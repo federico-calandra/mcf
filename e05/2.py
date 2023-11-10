@@ -16,7 +16,7 @@ Interpretare il grafico risultante.
 
 df_data=pd.read_csv('hit_times_M0.csv')
 
-plt.hist(log10(df_data['hit_time']),bins=20)
+plt.hist(log10(df_data['hit_time']),bins=100)
 plt.xlabel('log10(hit_time)')
 plt.ylabel('# of occurrences')
 plt.show()
@@ -27,7 +27,7 @@ for i in range(len(df_data['hit_time'])-1):
 # mask sulle differenze nulle
 mask_diff=diff!=0
 
-plt.hist(log10(diff[mask_diff]),bins=20)
+plt.hist(log10(diff[mask_diff]),bins=100)
 plt.xlabel('log10(Δhit_time)')
 plt.ylabel('# of occurrences')
 plt.show()
