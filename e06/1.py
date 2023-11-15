@@ -11,7 +11,7 @@ SUGGERIMENTO: assicurarsi di comprendere bene il comportamento ella funzione sci
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import scipy.integrate as spi
+from scipy.integrate import simpson
 import argparse
 
 def argp():
@@ -42,7 +42,7 @@ if args.plot=='s':
     s=np.empty(0)
     for i in range(1,len(df_data['t'])+1):
         y=df_data.iloc[0:i]['v']
-        ss=spi.simpson(y, dx=dt)
+        ss=simpson(y, dx=dt)
         s=np.append(s,ss)
 
     plt.plot(df_data['t'],s)
