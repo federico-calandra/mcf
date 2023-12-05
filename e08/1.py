@@ -2,7 +2,7 @@ import numpy as np
 from  scipy import integrate
 import matplotlib.pyplot as plt
 
-
+## tensione in ingresso
 def vin(t):
     t=np.trunc(t)
     if np.isscalar(t):
@@ -16,7 +16,7 @@ def vin(t):
         vin[mask]=-1
         return vin
 
-
+## eqz differenziale
 def fprime(vout,t,rc,vin):
     DyDt=(vin(t)-vout)/rc
     return DyDt
@@ -24,16 +24,19 @@ def fprime(vout,t,rc,vin):
 
 time=np.linspace(1,10,100)
 Vin=vin(time)
-Vout=np.empty(0)
-for rc in [1, 0.1, 0.01]:
-    Vout=np.asanyarray(integrate.odeint(fprime,y0=0,t=time,args=(rc,vin)))
+Vout={}
+for rc in [1, 0.1, 0.5]:
+    v=integrate.odeint(fprime,y0=0,t=time,args=(rc,vin)).flatten()
+    Vout[rc]=v
     plt.plot(time,Vin,label='Vin')
-    plt.plot(time,Vout,label='Vout_rc'+str(1./rc))
-    # plt.plot(time,Vout[1],label='Vout_rc01')
-    # plt.plot(time,Vout[2],label='Vout_rc001')
-plt.legend()
-plt.show()
+    plt.plot(time,v,label='Vout_RC='+str(rc))
+    plt.legend()
+    # plt.show()
 
-# np.savetxt((time, Vin, Vout),'data.csv')
+## costruisco array per csv
+d=Vin.copy()
+for k in Vout.values():
+    d=np.append(d,k)
+d=np.reshape(d,(4,100))
 
-breakpoint()
+np.savetxt('data.csv',d.transpose(),delimiter=', ',header='Vin, Vout_RC1, Vout_RC01, Vout_RC001',comments='')
