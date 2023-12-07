@@ -49,7 +49,7 @@ for s in ['sample1', 'sample2', 'sample3']:
     # plt.show()
     # breakpoint()
     
-    # fit
+    # fit  # provare a togliere i primi n campioni
     p_guess=[1,1]
     x=fft_freqs[s]
     p_opt,cov=optimize.curve_fit(func, x[1:len(pwsp)//2], pwsp[1:len(pwsp)//2], p0=p_guess) #,sigma=err_y,absolute_sigma=True)
