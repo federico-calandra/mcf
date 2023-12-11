@@ -76,11 +76,11 @@ for i in range(len(hist[1])-1):
     x=np.append(x,(hist[1][i+1] + hist[1][i])/2)
     
 ## stima parametri con gauss1
-def gauss1(x,a,mu,sigma,p1,p0):
-    return a*np.exp( -(x-mu)**2 / (2*sigma**2) ) + p1*x + p0
+def gauss(f,beta):
+    return 1./f**beta
 
-p_guess=[1200,9.5,1,50,1]     # a m σ p₁ p₀
-p_opt,cov=spo.curve_fit(gauss1,x,y,p_guess,sigma=err_y,absolute_sigma=True)
+p_guess=[1]     # a m σ p₁ p₀
+p_opt,cov=spo.curve_fit(gauss,,y,p_guess,sigma=err_y,absolute_sigma=True)
 # err_p=np.sqrt(np.diag(cov))
 
 ## scarto e chi²
