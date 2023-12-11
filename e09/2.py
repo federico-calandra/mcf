@@ -60,6 +60,7 @@ for i,df in data.items():
     seq=df[c[3]].values
     fft_data[i], fft_freqs[i], pwsp[i], p3[i]=my.fourier(seq)
     
+
 # # # ## GRAFICI SPETTRI DI POTENZA
 # # # fig3,ax1=plt.subplots(figsize=(10,7))
 # # # # fig2,ax2=plt.subplots(2,3,figsize=(10,7),sharex=True)
