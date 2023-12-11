@@ -11,83 +11,58 @@ Interpretare i risultati conforntando i tre spettri di potenza assieme ai segnal
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from scipy import fft, optimize
+import my
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
 from scipy import fft, optimize   
 
-## INPUT CSV
+## LEGGI CSV
 data={}
 data['sample1']=pd.read_csv('dati/data_sample1.csv')
 data['sample2']=pd.read_csv('dati/data_sample2.csv')
 data['sample3']=pd.read_csv('dati/data_sample3.csv')
-# breakpoint()
 
-
-# fig,axs=plt.subplots(1,3)
-fft_data={}     # saranno dict di nparray
+fft_data={}     # sono dict di nparray
 fft_freqs={}
-# rfft_data={}     # saranno dict di nparray
-# rfft_freqs={}
 
-# stima parametro
+## FUNZIONE PER FIT
 def func(f,beta,a):
     return a/f**beta
 
 for s in ['sample1', 'sample2', 'sample3']:
-    plt.plot(data[s]['time'],data[s]['meas'])
-    plt.title(s)
-    plt.xlabel('time (s)')
+    ## GRAFICO TEMPORALE
+    fig1,ax1=plt.subplots()
+    ax1.plot(data[s]['time'],data[s]['meas'])
+    ax_style={'xlabel':'time (s)', 'ylabel':'amplitude', 'title':s}
+    ax1.set(**ax_style)
     plt.show()
     
-    # fft reale
+    # FFT REALE
     seq=data[s]['meas'].values
     fft_data[s] = fft.rfft(seq)
     fft_freqs[s] = 0.5 * fft.rfftfreq(len(data[s]['meas']), d=1)
-    pwsp=np.abs(fft_data[s])**2
+    pwsp=np.absolute(fft_data[s])**2
     
-    # grafico spettro
-    plt.loglog(fft_freqs[s][1:len(pwsp)//2], pwsp[1:len(pwsp)//2])
-    plt.title('power spectre '+s)
-    # plt.show()
-    # breakpoint()
+    # GRAFICI SPETTRO
+    fig2,ax2=plt.subplots(1,3)
+    ax2[0].plot(fft_freqs[s][:len(pwsp)//2], pwsp[:len(pwsp)//2])
+    ax2[1].semilogy(fft_freqs[s][:len(pwsp)//2], pwsp[:len(pwsp)//2])
+    ax2[2].loglog(fft_freqs[s][:len(pwsp)//2], pwsp[:len(pwsp)//2],'.')
+    ax_style=[{'xlabel':'frequency (1/s)', 'ylabel':'absolute value of coefficient'},
+              {'xlabel':'frequency (1/s)', 'ylabel':'ln(absolute value of coefficient)'},
+              {'xlabel':'ln(frequency)', 'ylabel':'ln(absolute value of coefficient)'}]
+    ax2[0].set(**ax_style[0])
+    ax2[1].set(**ax_style[1])
+    ax2[2].set(**ax_style[2])
+    plt.show()
     
-    # fit  # provare a togliere i primi n campioni
+    ## FIT
     p_guess=[1,1]
     x=fft_freqs[s]
-    p_opt,cov=optimize.curve_fit(func, x[1:len(pwsp)//2], pwsp[1:len(pwsp)//2], p0=p_guess) #,sigma=err_y,absolute_sigma=True)
-    
+    p_opt,cov=optimize.curve_fit(func, x[1:len(pwsp)//2], pwsp[1:len(pwsp)//2], p0=p_guess)
     fit=func(x,p_opt[0],p_opt[1])
     plt.plot(x,fit)
-
     plt.show()
-    # breakpoint()
-    
-    
-    # ax_prop=[{'xlabel':'mass', 'ylabel':'# of occurences', 'title':'histogram of all events'},
-    #          {'xlabel':'mass', 'title':'histogram'},    #..., 
-    #          {'xlabel':'massN', 'title':'histogramN'}]
-    # for key,ax in enumerate(axs.flat):
-    #     ax.set(**ax_prop[key])
-
-    ###  fft complessa
-    # # # # # # # # spettro pot
-    # # # # # # # plt.plot(fft_freqs[s],fft_data[s])
-    # # # # # # # print(len(data[s]['meas'])//2)  # 2048
-    # # # # # # # print(fft_freqs[s][:len(data[s]['meas'])//2])
-    # # # # # # # # breakpoint()
-    # # # # # # # # axs[1].plot(data[s]['time'],data[s]['meas'])
-    # # # # # # # # axs[2].plot(data[s]['time'],data[s]['meas'])
-    # # # # # # # plt.show()
-
-# ## scarto e chi²
-# y_fit1=gauss1(x,p_opt[0],p_opt[1],p_opt[2],p_opt[3],p_opt[4])
-# delta_y=y-y_fit1
-# chi2=np.sum(delta_y**2/y)
-# print('X² =', chi2)
-# 
-# ## confronto grafico
-# fig,axs=plt.subplots(2)
-# axs[0].hist(mc2,range=(8,11),bins=100)
-# axs[0].plot(x,y_fit1)
-# axs[1].plot(x,delta_y)
-
-
-breakpoint()
