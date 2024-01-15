@@ -3,7 +3,6 @@ import random
 from itertools import compress
 from numpy import exp
 from scipy.constants import m_e,c
-
 from numpy import sum as arrsum
 
 """
@@ -179,7 +178,7 @@ class Particle():
         
         random.seed()
         if self.q==0:  # fotone
-            # probabilità di interazione 1-e^(-s), s=1 ⇒ P=0.56
+            # probabilità di interazione 1-e^(-s)
             rnd=random.uniform(0,1)
             if rnd>=(1-exp(-s) if is_det==False else 0):
                 p1=Particle(1,self.e/2,self.x)
@@ -189,7 +188,7 @@ class Particle():
                 prod=[self]
                 
         else:   # elettrone/positrone
-            # probabilità di interazione 1-e^(-7s/9), s=1 ⇒ P=0.68
+            # probabilità di interazione 1-e^(-7s/9)
             rnd=random.uniform(0,1)
             if rnd>=(1-exp(-7*s/9) if is_det==False else 0):
                 p1=Particle(self.q,self.e/2,self.x)
@@ -301,13 +300,20 @@ def config():
         se True la simulazione non segue le leggi probabilistiche
     """
     
+    # step della simulazione
     s=0
     while (s<=0) or (s>1):
         s=float(input('passo della simulazione (default 1.0): \n') or 1.0)
     
     # particella incidente e sciame iniziale
-    Q=int(input('carica della particella (default -1): \n') or -1)
-    E0=float(input('energia in MeV della particella  (default 1000.0): \n') or 1000.0)
+    Q=None
+    while Q not in [-1,0,1]:
+        Q=int(input('carica della particella (default -1): \n') or -1)
+    
+    E0=0
+    while E0<=0:
+        E0=float(input('energia in MeV della particella  (default 1000.0): \n') or 1000.0)
+    
     sw=Swarm([Particle(Q,E0)])
     sw_mask=[True]
     
