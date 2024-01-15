@@ -1,5 +1,5 @@
 import rossi
-import numpy as np
+from numpy import sum as arrsum
 
 """
 Questo programma esegue una simulazione montecarlo della propagazione di uno sciame elettromagnetico in un materiale 
@@ -33,6 +33,7 @@ args=rossi.argp()
 ## SIMULAZIONE EVOLUZIONE SCIAME
 en_ion=[]
 n_part=[]
+tot_ion=[]
 
 for i in range(1,N+1):
     print('*** SIMULAZIONE ***')
@@ -53,22 +54,6 @@ for i in range(1,N+1):
     
     en_ion.append(sim[0])
     n_part.append(sim[1])
-    
-###################################  TO DO
-if N==1:
-    fig1,ax1=plt.subplots(figsize=(10,7))
-    ax1.plot(n_part[0])
-else:
-    if N%2==0:
-        fig1,ax1=plt.subplots(N/2,2,figsize=(10,7),sharex=True,sharey=True)
-    else:
-        pass
-
-    ax1=ax1.flatten()
-    # ax_style={'xlabel':'step', 'ylabel':'# di particelle', 'title':''}
-    for i,d in zip(range(len(n_part)),n_part):
-        plot(ax1[i],d)
-        ax1[i].set(**ax_style)
-fig1.show()
+    tot_ion.append(arrsum(sim[0]))
     
 # breakpoint()
