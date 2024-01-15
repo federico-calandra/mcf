@@ -1,8 +1,10 @@
 import argparse
 import random
 from itertools import compress
-from math import exp
+from numpy import exp
 from scipy.constants import m_e,c
+
+from numpy import sum as arrsum
 
 """
 Questo programma definisce la classe degli oggetti Particella, Sciame e Materiale e definisce la funzione che simula la propagazione di uno sciame elettromagnetico secondo un modello derivato da quello di Rossi.
@@ -370,6 +372,9 @@ if __name__=='__main__':
     
     ## EVOLUZIONE SCIAME
     en_ion,n_part=evolve(mat,sw,sw_mask,is_det,s)
+    tot_ion=arrsum(en_ion)
     print('en_ion =',en_ion)
+    print('n_part =',n_part)
+    print('tot_ion =',tot_ion)  
     
 # breakpoint()
