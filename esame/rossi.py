@@ -10,20 +10,26 @@ from numpy import sum as arrsum
 Questo programma definisce la classe degli oggetti Particella, Sciame e Materiale e definisce la funzione che simula la propagazione di uno sciame elettromagnetico secondo un modello derivato da quello di Rossi.
 
 Variabili:
-mat : Material
-    materiale in cui lo sciame si propaga
+s : float
+    passo della simulazione, in frazione di X0+
+sw : Sciame
+    sciame che si propaga nel materiale
 Q : int
     carica della particella incidente, può essere 0 (fotone), -1 (elettrone) oppure 1 (positrone)
 E0 : float
     energia in MeV della particella incidente
-sw : Sciame
-    sciame che si propaga nel materiale
 sw_mask : list
     lista di bool che identifica quali particelle dello sciame hanno abbastanza energia per interagire con il materiale
+mat : Material
+    materiale in cui lo sciame si propaga
 is_deterministic : bool
     se True la propagazione non segue la legge probabilistica
+en_ion : list
+    elenco delle energie cedute dalle particelle in ogni step
 n_part : list
-    elenco del numero di particelle dello sciame ad ogni step
+    elenco del numero di particelle dello sciame in ogni step
+tot_ion : float
+    energia totale ceduta al materiale per ionizzazione
 """
 
 
@@ -113,21 +119,21 @@ class Particle():
         """ Stampa gli attributi della particella. """
         print('q = {}, E = {:f} MeV, x = {} cm'.format(self.q, self.e, self.x))
             
-    def propagate(self,mat,i,sw_mask,is_det,s):
+    def propagate(self,s,sw_mask,mat,is_det,i):
         """
         Calcola la propagazione della particella e la perdita di energia per ionizzazione.
     
         Argomenti:
-        mat : Material
-            materiale in cui la patricella si propaga
-        i : int
-            indice della list sw_mask corrispondente alla particella considerata
-        sw_mask : list
-            lista di bool che identifica quali particelle potranno interagire
-        is_det : bool
-            se True la simulazione non segue le leggi probabilistiche
         s : float
             passo della simulazione, in frazione di X0
+        sw_mask : list
+            lista di bool che identifica quali particelle potranno interagire
+        mat : Material
+            materiale in cui la patricella si propaga
+        is_det : bool
+            se True la simulazione non segue le leggi probabilistiche
+        i : int
+            indice della list sw_mask corrispondente alla particella considerata
         
         Restituisce:
         en_ion : float
@@ -140,7 +146,7 @@ class Particle():
                 en_ion=0 # si propaga senza perdite
                 self.x+=mat.X0*s
             else: # non può propagarsi
-                en_ion=(random.uniform(0,self.e) if is_det==False else 0)
+                en_ion=(random.uniform(0,self.e) if is_det==False else self.e)
                 self.e-=en_ion # cede energia al materiale
                 sw_mask[i]=False # viene esclusa dall'interazione
                 
@@ -150,7 +156,7 @@ class Particle():
                 self.x+=mat.X0*s
                 self.e-=en_ion
             else: # non può propagarsi
-                en_ion=(random.uniform(0,self.e) if is_det==False else 0)
+                en_ion=(random.uniform(0,self.e) if is_det==False else self.e)
                 self.e-=en_ion
                 sw_mask[i]=False
                 
@@ -220,28 +226,28 @@ class Swarm(list):
         for p in self:
             p.info()
             
-    def propagate(self,mat,sw_mask,is_det,s):
+    def propagate(self,s,sw_mask,mat,is_det):
         """
         La funzione propaga ogni particella dello sciame tenendo conto dell'energia di ionizzazione.
         
         Argomenti:
-        mat : Material
-            materiale in cui lo sciame si propaga
-        sw_mask : list
-            lista di bool che identifica quali paricelle potranno interagire
-        is_det : bool
-            se True la simulazione non segue le leggi probabilistiche
         s : float
             passo della simulazione, in frazione di X0
+        sw_mask : list
+            lista di bool che identifica quali particelle dello sciame partecipano all'interazione
+        mat : Material
+            materiale in cui lo sciame si propaga
+        is_det : bool
+            se True la simulazione non segue le leggi probabilistiche
         
         Restituisce:
-        step_ion : float
+        en_ion : float
             energia ceduta dalle particelle dello sciame nello step corrente
         """
-        step_ion=0
+        en_ion=0
         for p,i in zip(self,range(len(self))):
-            step_ion+=p.propagate(mat,i,sw_mask,is_det,s)
-        return step_ion
+            en_ion+=p.propagate(s,sw_mask,mat,is_det,i)
+        return en_ion
     
     def interact(self,s,is_det):
         """
@@ -281,10 +287,16 @@ def config():
     Restituisce:
     s : float
         passo della simulazione, in frazione di X0
+    sw : Sciame
+        sciame che si propaga nel materiale
     Q : int
-        carica della particella, può essere 0 (fotone), -1 (elettrone) oppure 1 (positrone)
+        carica della particella incidente, può essere 0 (fotone), -1 (elettrone) oppure 1 (positrone)
     E0 : float
         energia in MeV della particella incidente
+    sw_mask : list
+        lista di bool che identifica quali particelle dello sciame partecipano all'interazione
+    mat : Material
+        materiale in cui lo sciame si propaga
     is_det : bool
         se True la simulazione non segue le leggi probabilistiche
     """
@@ -293,39 +305,54 @@ def config():
     while (s<=0) or (s>1):
         s=float(input('passo della simulazione (default 1.0): \n') or 1.0)
     
-    # particella
+    # particella incidente e sciame iniziale
     Q=int(input('carica della particella (default -1): \n') or -1)
     E0=float(input('energia in MeV della particella  (default 1000.0): \n') or 1000.0)
+    sw=Swarm([Particle(Q,E0)])
+    sw_mask=[True]
     
     args=argp()
     
-    # evoluzione deterministica
+    # materiale
+    if args.material=='h2o':
+        mat=Material('h2o')
+    elif args.material=='pbwo4':
+        mat=Material('pbwo4')
+    if args.material=='test':
+        mat=Material('test')
+    else:
+        mat=Material('test')
+    
+    # switch evoluzione deterministica
     is_det=args.is_deterministic
     
-    return s,Q,E0,is_det
+    if __name__=='__main__':
+        return s,sw,sw_mask,mat,is_det
+    else:
+        return s,(Q,E0),mat,is_det
 
 
-def evolve(mat,sw,sw_mask,is_det,s):
+def evolve(s,sw,sw_mask,mat,is_det):
     """
     Funzione che calcola la propagazione e l'interazione di tutte le particelle dello sciame.
     
     Argomenti:
-    mat : Materiale
-        materiale in cui lo sciame si propaga
-    sw : Swarm
-        sciame che si propaga
-    sw_mask : list
-        lista di bool, se sm_mask[i]== True la i-esima particella è considerata per l'interazione
-    is_det : bool
-        se True la simulazione non segue le leggi probabilistiche
     s : float
         passo della simulazione, in frazione di X0
+    sw : Sciame
+        sciame che si propaga nel materiale
+    sw_mask : list
+        lista di bool che identifica quali particelle dello sciame partecipano all'interazione
+    mat : Material
+        materiale in cui lo sciame si propaga
+    is_det : bool
+        se True la simulazione non segue le leggi probabilistiche
     
     Restituisce:
     en_ion : list
-        elenco delle energie cedute dalle particelle, in ogni step
+        elenco delle energie cedute dalle particelle in ogni step
     n_part : list
-        elenco del numero di particelle nello sciamo, in ogni step
+        elenco del numero di particelle nello sciame in ogni step
     """
     
     en_ion=[]
@@ -334,13 +361,13 @@ def evolve(mat,sw,sw_mask,is_det,s):
     n=1
     while True in sw_mask:
         # PROPAGAZIONE
-        en_ion.append(sw.propagate(mat,sw_mask,is_det,s))
+        en_ion.append(sw.propagate(s,sw_mask,mat,is_det))
         n_part.append(len(sw))
-        sw.info() # risultato della propagazione
+        # sw.info() # risultato della propagazione
         
         # escludere particelle che non hanno abbastanza energia
         sw=Swarm(compress(sw,sw_mask))
-        sw.info() # queste particelle sono quelle che interagiscono
+        # sw.info() # queste particelle sono quelle che interagiscono
         
         # INTERAZIONE
         sw=sw.interact(s,is_det)
@@ -357,26 +384,13 @@ def evolve(mat,sw,sw_mask,is_det,s):
 
 
 if __name__=='__main__':
-    s,Q,E0,is_det=config()
-    args=argp()
-    
-    # materiale
-    if args.material=='h2o':
-        mat=Material('h2o')
-    elif args.material=='pbwo4':
-        mat=Material('pbwo4')
-    if args.material=='test':
-        mat=Material('test')
-    else:
-        mat=Material('test')
-
-    sw=Swarm([Particle(Q,E0)])
-    sw_mask=[True]
+    ## CONFIGURAZIONE SIMULAZIONE
+    s,sw,sw_mask,mat,is_det=config()
     sw.info()
     print()
     
-    ## EVOLUZIONE SCIAME
-    en_ion,n_part=evolve(mat,sw,sw_mask,is_det,s)
+    ## SIMULAZIONE EVOLUZIONE SCIAME
+    en_ion,n_part=evolve(s,sw,sw_mask,mat,is_det)
     tot_ion=arrsum(en_ion)
     print('en_ion =',en_ion)
     print('n_part =',n_part)
