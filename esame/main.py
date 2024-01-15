@@ -1,6 +1,9 @@
 import rossi
 from numpy import sum as arrsum
 
+import matplotlib.pyplot as plt
+import numpy as np
+
 """
 Questo programma esegue una simulazione montecarlo della propagazione di uno sciame elettromagnetico in un materiale 
 
@@ -23,11 +26,11 @@ sw_mask : list
     lista di bool che identifica quali particelle dello sciame hanno abbastanza energia per interagire con il materiale
 is_deterministic : bool
     se True la propagazione non segue la legge probabilistica
-"""
+"""        
 
 ## CONFIGURAZIONE SIMULAZIONE
 s,Q,E0,is_det=rossi.config()
-N=int(input('numero di simulazioni da eseguire (default 5): ') or 5)
+N=int(input('numero di simulazioni da eseguire (default 1): ') or 1)
 args=rossi.argp()
 
 ## SIMULAZIONE EVOLUZIONE SCIAME
@@ -47,6 +50,8 @@ for i in range(1,N+1):
         mat=rossi.Material('h2o')
     elif args.material=='pbwo4':
         mat=rossi.Material('pbwo4')
+    if args.material=='test':
+        mat=rossi.Material('test')
     else:
         mat=rossi.Material('test')
     
@@ -56,5 +61,21 @@ for i in range(1,N+1):
     n_part.append(sim[1])
     tot_ion.append(arrsum(sim[0]))
     print('********************')
+    
+###################################  TO DO
+if N==1:
+    print('tot_ion =',tot_ion)
+    fig,ax=plt.subplots(1,2,figsize=(13,7))
+    ax[0].plot(n_part[0])
+    ax_style={'xlabel':'step', 'ylabel':'# di particelle', 'title':'dimensione sciame'}
+    ax[0].set(**ax_style)
+    ax[1].plot(en_ion[0])
+    ax_style={'xlabel':'step', 'ylabel':'energia (MeV)', 'title':'energia persa per ionizzazione durante lo step'}
+    ax[1].set(**ax_style)
+    
+else:
+    pass
         
+plt.show()
+    
 # breakpoint()

@@ -134,6 +134,7 @@ class Particle():
             energia di ionizzazione ceduta dalla particella al materiale
         """
         
+        random.seed()
         if self.q==0: # fotone
             if self.e>2*m_e*c**2: # ha abbastanza energia
                 en_ion=0 # si propaga senza perdite
@@ -170,6 +171,7 @@ class Particle():
             lista contenente le particelle prodotte
         """
         
+        random.seed()
         if self.q==0:  # fotone
             # probabilità di interazione 1-e^(-s), s=1 ⇒ P=0.56
             rnd=random.uniform(0,1)
@@ -271,6 +273,7 @@ def argp():
     parser.add_argument('material', choices=['h2o','pbwo4','test'], nargs='?', default='test')
     return  parser.parse_args()
 
+
 def config():
     """
     La funzione chiede all'utente di inserire i parametri necessari per la simulazione.
@@ -292,7 +295,7 @@ def config():
     
     # particella
     Q=int(input('carica della particella (default -1): \n') or -1)
-    E0=float(input('energia in MeV della particella  (default 50.0): \n') or 50.0)
+    E0=float(input('energia in MeV della particella  (default 1000.0): \n') or 1000.0)
     
     args=argp()
     
@@ -362,6 +365,8 @@ if __name__=='__main__':
         mat=Material('h2o')
     elif args.material=='pbwo4':
         mat=Material('pbwo4')
+    if args.material=='test':
+        mat=Material('test')
     else:
         mat=Material('test')
 
