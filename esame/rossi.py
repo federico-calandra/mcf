@@ -316,6 +316,6 @@ if __name__=='__main__':
     
     ## EVOLUZIONE SCIAME
     en_ion,n_part=evolve(mat,sw,sw_mask,is_deterministic)
-    print('en_ion = '+en_ion)
+    print('en_ion =',en_ion)
     
 # breakpoint()
