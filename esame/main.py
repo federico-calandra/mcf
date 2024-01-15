@@ -36,7 +36,7 @@ n_part=[]
 tot_ion=[]
 
 for i in range(1,N+1):
-    print('*** SIMULAZIONE ***')
+    print('********** SIMULAZIONE **********')
     print('N = '+str(i))
     sw=rossi.Swarm([rossi.Particle(Q,E0)])
     sw_mask=[True]
@@ -55,5 +55,6 @@ for i in range(1,N+1):
     en_ion.append(sim[0])
     n_part.append(sim[1])
     tot_ion.append(arrsum(sim[0]))
+    print('********************')
         
 # breakpoint()
