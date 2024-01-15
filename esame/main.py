@@ -55,5 +55,5 @@ for i in range(1,N+1):
     en_ion.append(sim[0])
     n_part.append(sim[1])
     tot_ion.append(arrsum(sim[0]))
-    
+        
 # breakpoint()
