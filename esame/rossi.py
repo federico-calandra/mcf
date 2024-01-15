@@ -78,7 +78,7 @@ class Particle():
     
     Attributi:
     q : int
-        carica della particella
+        carica della particella, può essere 0 (fotone), -1 (elettrone) oppure 1 (positrone)
     e : float
         energia in MeV della particella
     x : float
@@ -111,7 +111,7 @@ class Particle():
         """ Stampa gli attributi della particella. """
         print('q = {}, E = {:f} MeV, x = {} cm'.format(self.q, self.e, self.x))
             
-    def propagate(self,mat,i,sw_mask,is_det):
+    def propagate(self,mat,i,sw_mask,is_det,s):
         """
         Calcola la propagazione della particella e la perdita di energia per ionizzazione.
     
@@ -123,7 +123,9 @@ class Particle():
         sw_mask : list
             lista di bool che identifica quali particelle potranno interagire
         is_det : bool
-            se True la propagazione non segue la legge probabilistica
+            se True la simulazione non segue le leggi probabilistiche
+        s : float
+            passo della simulazione, in frazione di X0
         
         Restituisce:
         en_ion : float
@@ -133,16 +135,16 @@ class Particle():
         if self.q==0: # fotone
             if self.e>2*m_e*c**2: # ha abbastanza energia
                 en_ion=0 # si propaga senza perdite
-                self.x+=mat.X0 
+                self.x+=mat.X0*s
             else: # non può propagarsi
                 en_ion=(random.uniform(0,self.e) if is_det==False else 0)
                 self.e-=en_ion # cede energia al materiale
                 sw_mask[i]=False # viene esclusa dall'interazione
                 
         else: # elettrone/positrone
-            if self.e>mat.dE*mat.X0: # ha abbastanza energia
-                en_ion=mat.dE*mat.X0
-                self.x+=mat.X0
+            if self.e>mat.dE*mat.X0*s: # ha abbastanza energia
+                en_ion=mat.dE*mat.X0*s
+                self.x+=mat.X0*s
                 self.e-=en_ion
             else: # non può propagarsi
                 en_ion=(random.uniform(0,self.e) if is_det==False else 0)
@@ -151,13 +153,15 @@ class Particle():
                 
         return en_ion
             
-    def interact(self,is_det):
+    def interact(self,s,is_det):
         """
         Calcola i prodotti dell'interazione della particella con il materiale.
         
         Argomenti:
+        s : float
+            passo della simulazione, in frazione di X0
         is_det : bool
-            se True la propagazione non segue la legge probabilistica
+            se True la simulazione non segue le leggi probabilistiche
         
         Restituisce:
         prod : list
@@ -212,9 +216,9 @@ class Swarm(list):
         for p in self:
             p.info()
             
-    def propagate(self,mat,sw_mask,is_det):
+    def propagate(self,mat,sw_mask,is_det,s):
         """
-        Propaga ogni particella dello sciame tenendo conto dell'energia di ionizzazione.
+        La funzione propaga ogni particella dello sciame tenendo conto dell'energia di ionizzazione.
         
         Argomenti:
         mat : Material
@@ -222,31 +226,37 @@ class Swarm(list):
         sw_mask : list
             lista di bool che identifica quali paricelle potranno interagire
         is_det : bool
-            se True la propagazione non segue la legge probabilistica
+            se True la simulazione non segue le leggi probabilistiche
+        s : float
+            passo della simulazione, in frazione di X0
         
         Restituisce:
-        tot_ion : float
+        step_ion : float
             energia ceduta dalle particelle dello sciame nello step corrente
         """
         step_ion=0
         for p,i in zip(self,range(len(self))):
-            step_ion+=p.propagate(mat,i,sw_mask,is_det)
+            step_ion+=p.propagate(mat,i,sw_mask,is_det,s)
         return step_ion
     
-    def interact(self,is_det):
+    def interact(self,s,is_det):
         """
-        Fa interagire ogni particella dello sciame.
+        La funzione calcola i prodotti dell'interazione di ogni particella dello sciame.
+        
+        Argomenti:
+        s : float
+            passo della simulazione, in frazione di X0
+        is_det : bool
+            se True la simulazione non segue le leggi probabilistiche
         
         Restituisce:
         tmpsc : Sciame
             sciame delle particelle risultanti dall'interazione
-        is_det : bool
-            se True la propagazione non segue la legge probabilistica
         """
         
         tmpsc=[]
         for p in self:
-            tmpsc.append(p.interact(is_det))
+            tmpsc.append(p.interact(s,is_det))
         # tmpsc contiene le particelle prodotte dalle interazioni dello sciame
         tmpsc=Swarm(sum(tmpsc,[])) # equivalente del metodo flatten di numpy
         return tmpsc
@@ -255,29 +265,80 @@ class Swarm(list):
 def argp():
     """ Inizializza il parser degli argomenti. """
     parser=argparse.ArgumentParser()
-    # parser.add_argument('material', choices=['h2o','pbwo4','test'], nargs='?', default='test')
-    # parser.add_argument('particle', nargs='?', default='-1,500')
-    parser.add_argument('-m','--material')
     parser.add_argument('-d', '--is-deterministic', action='store_true')
+    parser.add_argument('material', choices=['h2o','pbwo4','test'], nargs='?', default='test')
     return  parser.parse_args()
 
-def evolve(mat,sw,sw_mask,is_det):
-    ### EVOLUZIONE SCIAME
+def config():
+    """
+    La funzione chiede all'utente di inserire i parametri necessari per la simulazione.
+    
+    Restituisce:
+    s : float
+        passo della simulazione, in frazione di X0
+    Q : int
+        carica della particella, può essere 0 (fotone), -1 (elettrone) oppure 1 (positrone)
+    E0 : float
+        energia in MeV della particella incidente
+    is_det : bool
+        se True la simulazione non segue le leggi probabilistiche
+    """
+    
+    s=0
+    while (s<=0) or (s>1):
+        s=float(input('passo della simulazione (default 1.0): \n') or 1.0)
+    
+    # particella
+    Q=int(input('carica della particella (default -1): \n') or -1)
+    E0=float(input('energia in MeV della particella  (default 50.0): \n') or 50.0)
+    
+    args=argp()
+    
+    # evoluzione deterministica
+    is_det=args.is_deterministic
+    
+    return s,Q,E0,is_det
+
+
+def evolve(mat,sw,sw_mask,is_det,s):
+    """
+    Funzione che calcola la propagazione e l'interazione di tutte le particelle dello sciame.
+    
+    Argomenti:
+    mat : Materiale
+        materiale in cui lo sciame si propaga
+    sw : Swarm
+        sciame che si propaga
+    sw_mask : list
+        lista di bool, se sm_mask[i]== True la i-esima particella è considerata per l'interazione
+    is_det : bool
+        se True la simulazione non segue le leggi probabilistiche
+    s : float
+        passo della simulazione, in frazione di X0
+    
+    Restituisce:
+    en_ion : list
+        elenco delle energie cedute dalle particelle, in ogni step
+    n_part : list
+        elenco del numero di particelle nello sciamo, in ogni step
+    """
+    
     en_ion=[]
     n_part=[]
+      
     n=1
     while True in sw_mask:
         # PROPAGAZIONE
-        en_ion.append(sw.propagate(mat,sw_mask,is_det))
+        en_ion.append(sw.propagate(mat,sw_mask,is_det,s))
         n_part.append(len(sw))
-        # sw.info() # le particelle con E < Ec cedono energia ma saranno escluse dallo sciame
+        sw.info() # risultato della propagazione
         
         # escludere particelle che non hanno abbastanza energia
         sw=Swarm(compress(sw,sw_mask))
-        # sw.info() # queste particelle sono quelle che interagiscono
+        sw.info() # queste particelle sono quelle che interagiscono
         
         # INTERAZIONE
-        sw=sw.interact(is_det)
+        sw=sw.interact(s,is_det)
         sw.info() # risultato dell'interazione
         print('n step = '+str(n)+'\n')
         
@@ -290,11 +351,10 @@ def evolve(mat,sw,sw_mask,is_det):
     return en_ion,n_part
 
 
-
 if __name__=='__main__':
-    ## CONFIGURAZIONE SIMULAZIONE
+    s,Q,E0,is_det=config()
     args=argp()
-
+    
     # materiale
     if args.material=='h2o':
         mat=Material('h2o')
@@ -303,19 +363,13 @@ if __name__=='__main__':
     else:
         mat=Material('test')
 
-    # particella
-    Q=int(input('carica della particella (default -1): ') or -1)
-    E0=float(input('energia in MeV della particella  (default 1000): ') or 1000)
     sw=Swarm([Particle(Q,E0)])
     sw_mask=[True]
     sw.info()
     print()
-
-    # evoluzione deterministica
-    is_deterministic=args.is_deterministic
     
     ## EVOLUZIONE SCIAME
-    en_ion,n_part=evolve(mat,sw,sw_mask,is_deterministic)
+    en_ion,n_part=evolve(mat,sw,sw_mask,is_det,s)
     print('en_ion =',en_ion)
     
 # breakpoint()
