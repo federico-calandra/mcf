@@ -1,6 +1,7 @@
 import argparse
 import random
 from itertools import compress
+from math import exp
 from scipy.constants import m_e,c
 
 """
@@ -166,7 +167,7 @@ class Particle():
         if self.q==0:  # fotone
             # probabilità di interazione 1-e^(-s), s=1 ⇒ P=0.56
             rnd=random.uniform(0,1)
-            if rnd>=(0.56 if is_det==False else 0):
+            if rnd>=(1-exp(-s) if is_det==False else 0):
                 p1=Particle(1,self.e/2,self.x)
                 p2=Particle(-1,self.e/2,self.x)
                 prod=[p1,p2]
@@ -176,7 +177,7 @@ class Particle():
         else:   # elettrone/positrone
             # probabilità di interazione 1-e^(-7s/9), s=1 ⇒ P=0.68
             rnd=random.uniform(0,1)
-            if rnd>=(0.68 if is_det==False else 0):
+            if rnd>=(1-exp(-7*s/9) if is_det==False else 0):
                 p1=Particle(self.q,self.e/2,self.x)
                 p2=Particle(0,self.e/2,self.x)
                 prod=[p1,p2]
