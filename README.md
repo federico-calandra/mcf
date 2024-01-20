@@ -9,7 +9,7 @@ In un sistema operativo Linux la sintassi è la seguente:
 
         python main.py [-c] [-d] [<materiale>]
 
-Con il flag `[-c]` si utilizzano i valori di default per i parametri di simulazione.
+Con il flag `[-c]` si utilizzano i valori di default per i parametri di simulazione (step=1, carica=-1 energia=1 Tev). Il numero di simulazioni deve comunque essere inserito.
 
 Con il flag `[-d]` la propagazione non segue le leggi probabilistiche.
 
@@ -18,7 +18,7 @@ Il campo opzionale `<materiale>` può essere `h2o`, `pbwo4` oppure `test`; se om
 La stessa sintassi è valida anche per `rossi.py`, ma in questo caso viene eseguita solamente 1 simulazione.
 
 ## Autore
-Il codice è stato scritto da Federico Calandra come progetto per l'esame di Metodi Computazionali per la Fisica.
+Il codice è stato scritto da Federico Calandra come progetto d'esame per il corso di Metodi Computazionali per la Fisica, nell'a.a. 2023/2024.
 
 ## Licenza
-Tutti i file in questo repository sono rilasciati con licenza open source.
+Tutti i file in questo repository sono rilasciati con licenza Open Source.
