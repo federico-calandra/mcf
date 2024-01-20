@@ -9,7 +9,7 @@ In un sistema operativo Linux la sintassi è la seguente:
 
         python main.py [-c] [-d] [<materiale>]
 
-Con il flag `[-c]` si utilizzano i valori di default per i parametri di simulazione (step=1, carica=-1 energia=1 Tev). Il numero di simulazioni deve comunque essere inserito.
+Con il flag `[-c]` si utilizzano i valori di default per i parametri di simulazione (step=1, Q=-1, E₀=1 TeV). Il numero di simulazioni deve comunque essere inserito.
 
 Con il flag `[-d]` la propagazione non segue le leggi probabilistiche.
 
