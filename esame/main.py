@@ -1,32 +1,45 @@
 import rossi
 from numpy import sum as arrsum
-
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import numpy as np
 
 """
-Questo programma esegue una simulazione montecarlo della propagazione di uno sciame elettromagnetico in un materiale 
+Questo programma importa il modulo 'rossi.py' ed esegue una simulazione montecarlo della propagazione di uno sciame elettromagnetico in un materiale 
 
 Variabili:
 N : int
     numero di simulazioni da eseguire
-en_ion: list
-    elenco delle energia cedute al materiale ad ogni step
-n_part : list
-    elenco del numero di particelle dello sciame ad ogni step
-
+s : float
+    passo della simulazione, in frazione di X0
 Q : int
-    carica della particella incidente, può essere 0 (fotone), -1 (elettrone) oppure 1 (positrone)
+    carica della particella incidente, 0 (fotone), -1 (elettrone) oppure 1 (positrone)
 E0 : float
     energia in MeV della particella incidente
-
+mat : Material
+    materiale in cui lo sciame si propaga
+is_det : bool
+    se True la propagazione non segue la legge probabilistica
+sw : Sciame
+    sciame che si propaga nel materiale
+sw_mask : list
+    lista di bool che identifica quali particelle dello sciame interagiscono nello step
+n_step : int
+    numero totale degli step eseguiti
+en_ion : list
+    elenco delle energie cedute dalle particelle in ogni step
+n_part : list
+    elenco del numero di particelle dello sciame in ogni step
+tot_ion : float
+    energia totale ceduta al materiale per ionizzazione
 """        
 
 ## CONFIGURAZIONE SIMULAZIONE
 N=int(input('numero di simulazioni da eseguire (default 1): \n') or 1)
-s,(Q,E0),mat,is_det=rossi.config()
+args=rossi.argp()
+s,Q,E0,mat,is_det=rossi.config(args.config_default)
 
 ## SIMULAZIONE EVOLUZIONE SCIAME
+n_step=[]
 en_ion=[]
 n_part=[]
 tot_ion=[]
@@ -40,13 +53,18 @@ for i in range(1,N+1):
     print('********** SIMULAZIONE **********')
     print('N = '+str(i))
     sim=rossi.evolve(s,sw,sw_mask,mat,is_det)
-    
-    en_ion.append(sim[0])
-    n_part.append(sim[1])
-    tot_ion.append(arrsum(sim[0]))
+    n_step.append(sim[0]-1)
+    en_ion.append(sim[1])
+    n_part.append(sim[2])
+    tot_ion.append(arrsum(sim[1]))
+    print('n_step =',n_step)
     print('en_ion =',en_ion)
     print('n_part =',n_part)
     print('tot_ion =',tot_ion)  
+    
+    
+    
+    
     
     
     

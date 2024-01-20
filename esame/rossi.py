@@ -8,33 +8,26 @@ from numpy import sum as arrsum
 """
 Questo programma definisce la classe degli oggetti Particella, Sciame e Materiale e definisce la funzione che simula la propagazione di uno sciame elettromagnetico secondo un modello derivato da quello di Rossi.
 
-Variabili:
-s : float
-    passo della simulazione, in frazione di X0+
-sw : Sciame
-    sciame che si propaga nel materiale
-Q : int
-    carica della particella incidente, può essere 0 (fotone), -1 (elettrone) oppure 1 (positrone)
-E0 : float
-    energia in MeV della particella incidente
-sw_mask : list
-    lista di bool che identifica quali particelle dello sciame hanno abbastanza energia per interagire con il materiale
-mat : Material
-    materiale in cui lo sciame si propaga
-is_deterministic : bool
-    se True la propagazione non segue la legge probabilistica
-en_ion : list
-    elenco delle energie cedute dalle particelle in ogni step
-n_part : list
-    elenco del numero di particelle dello sciame in ogni step
-tot_ion : float
-    energia totale ceduta al materiale per ionizzazione
+Classi:
+Material
+    rappresenta il materiale in cui lo sciame si propaga
+Particle
+    rappresenta una particella dello sciame
+Swarm
+    rappresenta lo sciame di particelle
+    
+Funzioni:
+argp
+    inizializza il parser degli argomenti
+config
+    configura i parametri necessari per la simulazione
+evolve
+    calcola la propagazione e l'interazione di tutte le particelle dello sciame
 """
-
 
 class Material():
     """
-    Classe che rappresenta il materiale in cui lo sciame si propaga.
+    Rappresenta il materiale in cui lo sciame si propaga.
     
     Attributi:
     X0 : float
@@ -57,8 +50,9 @@ class Material():
         
         Argomenti:
         name : string
-            identifica il materiale tra ghiaccio 'h20' e tungstato di piombo 'pbwo4'
+            identifica il materiale tra ghiaccio 'h2o' e tungstato di piombo 'pbwo4'
         """
+        
         if name=='h2o':
             self.X0=39.31
             self.dE=1.822
@@ -76,12 +70,11 @@ class Material():
         """ Stampa gli attributi del materiale. """
         print('*** Materiale ***')
         print('X0 = {} cm, dE = {} MeV/cm, Ec = {} MeV'.format(self.X0,self.dE,self.Ec))
-        # print('energia di ionizzazione = {}'.format())
 
 
 class Particle():
     """
-    Classe che rappresenta una particella dello sciame.
+    Rappresenta una particella dello sciame.
     
     Attributi:
     q : int
@@ -201,7 +194,7 @@ class Particle():
 
 class Swarm(list):
     """
-    Classe che rappresenta lo sciame di particelle.
+    Rappresenta lo sciame di particelle.
         
     Attributi:
     dim : int
@@ -243,6 +236,7 @@ class Swarm(list):
         en_ion : float
             energia ceduta dalle particelle dello sciame nello step corrente
         """
+        
         en_ion=0
         for p,i in zip(self,range(len(self))):
             en_ion+=p.propagate(s,sw_mask,mat,is_det,i)
@@ -273,49 +267,51 @@ class Swarm(list):
 
 def argp():
     """ Inizializza il parser degli argomenti. """
+        
     parser=argparse.ArgumentParser()
+    parser.add_argument('-c', '--config-default', action='store_true')
     parser.add_argument('-d', '--is-deterministic', action='store_true')
-    parser.add_argument('material', choices=['h2o','pbwo4','test'], nargs='?', default='test')
+    parser.add_argument('material', choices=['h2o','pbwo4','test'], nargs='?', default='pbwo4')
     return  parser.parse_args()
 
 
-def config():
+def config(config_default):
     """
     La funzione chiede all'utente di inserire i parametri necessari per la simulazione.
+    
+    Argomenti;
+    config_default : bool
+        se True vengono utilizzati i parametri di default per la simulaizione
     
     Restituisce:
     s : float
         passo della simulazione, in frazione di X0
-    sw : Sciame
-        sciame che si propaga nel materiale
     Q : int
         carica della particella incidente, può essere 0 (fotone), -1 (elettrone) oppure 1 (positrone)
     E0 : float
         energia in MeV della particella incidente
-    sw_mask : list
-        lista di bool che identifica quali particelle dello sciame partecipano all'interazione
     mat : Material
         materiale in cui lo sciame si propaga
     is_det : bool
         se True la simulazione non segue le leggi probabilistiche
     """
     
-    # step della simulazione
-    s=0
-    while (s<=0) or (s>1):
-        s=float(input('passo della simulazione (default 1.0): \n') or 1.0)
-    
-    # particella incidente e sciame iniziale
-    Q=None
-    while Q not in [-1,0,1]:
-        Q=int(input('carica della particella (default -1): \n') or -1)
-    
-    E0=0
-    while E0<=0:
-        E0=float(input('energia in MeV della particella  (default 1000.0): \n') or 1000.0)
-    
-    sw=Swarm([Particle(Q,E0)])
-    sw_mask=[True]
+    if config_default==True:
+        s=1
+        Q=-1
+        E0=1e4
+    else:
+        # step della simulazione
+        s=0
+        while (s<=0) or (s>1):
+            s=float(input('passo della simulazione (default 1.0): \n') or 1.0)
+        # carica ed energia particella
+        Q=None
+        while Q not in [-1,0,1]:
+            Q=int(input('carica della particella (default -1): \n') or -1)
+        E0=0
+        while E0<=0:
+            E0=float(input('energia in MeV della particella (default 10000.0): \n') or 1e4)
     
     args=argp()
     
@@ -332,15 +328,12 @@ def config():
     # switch evoluzione deterministica
     is_det=args.is_deterministic
     
-    if __name__=='__main__':
-        return s,sw,sw_mask,mat,is_det
-    else:
-        return s,(Q,E0),mat,is_det
+    return s,Q,E0,mat,is_det
 
 
 def evolve(s,sw,sw_mask,mat,is_det):
     """
-    Funzione che calcola la propagazione e l'interazione di tutte le particelle dello sciame.
+    Calcola la propagazione e l'interazione di tutte le particelle dello sciame.
     
     Argomenti:
     s : float
@@ -355,6 +348,8 @@ def evolve(s,sw,sw_mask,mat,is_det):
         se True la simulazione non segue le leggi probabilistiche
     
     Restituisce:
+    n_step : int
+        numero totale degli step eseguiti
     en_ion : list
         elenco delle energie cedute dalle particelle in ogni step
     n_part : list
@@ -386,18 +381,23 @@ def evolve(s,sw,sw_mask,mat,is_det):
         else:
             print('Non ci sono più particelle che possono interagire.')
             print()
-    return en_ion,n_part
+            n_step=n
+    return n_step,en_ion,n_part
 
 
 if __name__=='__main__':
     ## CONFIGURAZIONE SIMULAZIONE
-    s,sw,sw_mask,mat,is_det=config()
+    args=argp()
+    s,Q,E0,mat,is_det=config(args.config_default)
+    sw=Swarm([Particle(Q,E0)])
+    sw_mask=[True]
     sw.info()
     print()
     
     ## SIMULAZIONE EVOLUZIONE SCIAME
-    en_ion,n_part=evolve(s,sw,sw_mask,mat,is_det)
+    n_step,en_ion,n_part=evolve(s,sw,sw_mask,mat,is_det)
     tot_ion=arrsum(en_ion)
+    print('n_step =',n_step)
     print('en_ion =',en_ion)
     print('n_part =',n_part)
     print('tot_ion =',tot_ion)  
