@@ -15,7 +15,7 @@ Con il flag `[-d]` la propagazione non segue le leggi probabilistiche.
 
 Il campo opzionale `<materiale>` può essere `h2o`, `pbwo4` oppure `test`; se omesso si utilizza il materiale `pbwo4`.
 
-La stessa sintassi è valida anche per `rossi.py`, ma in questo caso viene eseguita solamente 1 simulazione.
+Questa sintassi è valida anche per `rossi.py`, ma in questo caso viene eseguita solamente 1 simulazione.
 
 ## Autore
 Il codice è stato scritto da Federico Calandra come progetto d'esame per il corso di Metodi Computazionali per la Fisica, nell'a.a. 2023/2024.
