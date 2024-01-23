@@ -34,9 +34,13 @@ tot_ion : float
 """        
 
 ## CONFIGURAZIONE SIMULAZIONE
-N=int(input('numero di simulazioni da eseguire (default 1): \n') or 1)
+N=0
+while N<=0:
+    N=int(input('numero di simulazioni da eseguire (default 1): \n') or 1)
 args=rossi.argp()
 s,Q,E0,mat,is_det=rossi.config(args.config_default)
+mat.info()
+print()
 
 ## SIMULAZIONE EVOLUZIONE SCIAME
 n_step=[]
@@ -63,23 +67,22 @@ for i in range(1,N+1):
     print('tot_ion =',tot_ion)  
     
     
-    
-    
-    
-    
-    
-# # # if N==1:
-# # #     print('tot_ion =',tot_ion)
-# # #     fig,ax=plt.subplots(1,2,figsize=(13,7))
-# # #     ax[0].plot(n_part[0])
-# # #     ax_style={'xlabel':'step', 'ylabel':'# di particelle', 'title':'dimensione sciame'}
-# # #     ax[0].set(**ax_style)
-# # #     ax[1].plot(en_ion[0])
-# # #     ax_style={'xlabel':'step', 'ylabel':'energia (MeV)', 'title':'energia persa per ionizzazione durante lo step'}
-# # #     ax[1].set(**ax_style)
-# # # else:
-# # #     pass
-# # #         
-# # # plt.show()
+## ANALISI RISULTATI
+if N==1:
+    fig,ax=plt.subplots(1,2,figsize=(13,7))
+    ax[0].plot(n_part[0])
+    ax_style={'xlabel':'step', 'ylabel':'# di particelle', 'title':'dimensione sciame'}
+    ax[0].set(**ax_style)
+    ax[1].plot(en_ion[0])
+    ax_style={'xlabel':'step', 'ylabel':'energia (MeV)', 'title':'energia ceduta nello step'}
+    ax[1].set(**ax_style)
+    plt.show()
+
+else:
+    pass
+    # if energy_step=='False': # N simulazioni con la stessa energia
+    #     pass
+    # else: # N simulazioni con energia a crescere
+    #     pass
     
 # breakpoint()
