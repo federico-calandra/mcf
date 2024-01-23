@@ -1,10 +1,3 @@
-import argparse
-import random
-from itertools import compress
-from numpy import exp
-from scipy.constants import m_e,c
-from numpy import sum as arrsum
-
 """
 Questo programma definisce la classe degli oggetti Particella, Sciame e Materiale e definisce la funzione che simula la propagazione di uno sciame elettromagnetico secondo un modello derivato da quello di Rossi.
 
@@ -25,6 +18,13 @@ evolve
     calcola la propagazione e l'interazione di tutte le particelle dello sciame
 """
 
+import argparse
+import random
+from itertools import compress
+from numpy import exp
+from numpy import sum as arrsum
+from scipy.constants import m_e,c
+
 class Material():
     """
     Rappresenta il materiale in cui lo sciame si propaga.
@@ -41,10 +41,9 @@ class Material():
 
     Metodi:
     __init__ : costruttore della classe
-    info : stampa la dimensione e gli attributi delle particelle dello sciame
     """
     
-    def __init__(self,name):
+    def __init__(self,X0=None,dE=None,Ec=None,name=None):
         """ 
         Crea il materiale.
         
@@ -54,23 +53,26 @@ class Material():
         """
         
         if name=='h2o':
-            self.X0=39.31
-            self.dE=1.822
-            self.Ec=78.6 
+            self.X0=39.31 # cm
+            self.dE=1.82 # MeV/cm
+            self.Ec=78.60 # MeV
         elif name=='pbwo4':
-            self.X0=0.89 
-            self.dE=10.20
-            self.Ec=9.31 
+            self.X0=0.89 # cm
+            self.dE=10.20 # MeV/cm
+            self.Ec=9.31 # MeV
+        elif name=='test':
+            self.X0=10 # cm
+            self.dE=1 # MeV/cm
+            self.Ec=10 # MeV
         else:
-            self.X0=10
-            self.dE=1
-            self.Ec=10
-    
+            self.X0=X0
+            self.dE=dE
+            self.Ec=Ec
+            
     def info(self):
-        """ Stampa gli attributi del materiale. """
         print('*** Materiale ***')
         print('X0 = {} cm, dE = {} MeV/cm, Ec = {} MeV'.format(self.X0,self.dE,self.Ec))
-
+            
 
 class Particle():
     """
@@ -103,6 +105,7 @@ class Particle():
         x : float
             posizione in cm della particella rispetto al punto di ingreso nel materiale
         """
+        
         self.q=q
         self.e=e
         self.x=x
@@ -171,9 +174,9 @@ class Particle():
         
         random.seed()
         if self.q==0:  # fotone
-            # probabilità di interazione 1-e^(-s)
+            # probabilità di interazione 1-e^(-7s/9)
             rnd=random.uniform(0,1)
-            if rnd>=(1-exp(-s) if is_det==False else 0):
+            if rnd<=(1-exp(-7*s/9) if is_det==False else 1):
                 p1=Particle(1,self.e/2,self.x)
                 p2=Particle(-1,self.e/2,self.x)
                 prod=[p1,p2]
@@ -181,9 +184,9 @@ class Particle():
                 prod=[self]
                 
         else:   # elettrone/positrone
-            # probabilità di interazione 1-e^(-7s/9)
+            # probabilità di interazione 1-e^(-s)
             rnd=random.uniform(0,1)
-            if rnd>=(1-exp(-7*s/9) if is_det==False else 0):
+            if rnd<=(1-exp(-s) if is_det==False else 1):
                 p1=Particle(self.q,self.e/2,self.x)
                 p2=Particle(0,self.e/2,self.x)
                 prod=[p1,p2]
@@ -269,9 +272,10 @@ def argp():
     """ Inizializza il parser degli argomenti. """
         
     parser=argparse.ArgumentParser()
-    parser.add_argument('-c', '--config-default', action='store_true')
-    parser.add_argument('-d', '--is-deterministic', action='store_true')
-    parser.add_argument('material', choices=['h2o','pbwo4','test'], nargs='?', default='pbwo4')
+    parser.add_argument('-c','--config-default',action='store_true')
+    parser.add_argument('-d','--is-deterministic',action='store_true')
+    parser.add_argument('-e','--energy-step',action='store_true')
+    parser.add_argument('-m','--material',action='store')
     return  parser.parse_args()
 
 
@@ -287,7 +291,7 @@ def config(config_default):
     s : float
         passo della simulazione, in frazione di X0
     Q : int
-        carica della particella incidente, può essere 0 (fotone), -1 (elettrone) oppure 1 (positrone)
+        carica della particella incidente, 0 (fotone), -1 (elettrone) oppure 1 (positrone)
     E0 : float
         energia in MeV della particella incidente
     mat : Material
@@ -296,34 +300,38 @@ def config(config_default):
         se True la simulazione non segue le leggi probabilistiche
     """
     
+    # step e carica
     if config_default==True:
         s=1
         Q=-1
-        E0=1e4
+        E0=1e3
     else:
         # step della simulazione
         s=0
         while (s<=0) or (s>1):
-            s=float(input('passo della simulazione (default 1.0): \n') or 1.0)
+            s=float(input('passo della simulazione (default 1.0)\n') or 1.0)
         # carica ed energia particella
         Q=None
         while Q not in [-1,0,1]:
-            Q=int(input('carica della particella (default -1): \n') or -1)
+            Q=int(input('carica della particella (default -1)\n') or -1)
         E0=0
         while E0<=0:
-            E0=float(input('energia in MeV della particella (default 10000.0): \n') or 1e4)
-    
-    args=argp()
-    
+            E0=float(input('energia in MeV della particella (default 1000.0)\n') or 1e3)
+            
+    args=argp()  
+ 
     # materiale
     if args.material=='h2o':
-        mat=Material('h2o')
+        mat=Material(name='h2o')
     elif args.material=='pbwo4':
-        mat=Material('pbwo4')
-    if args.material=='test':
-        mat=Material('test')
-    else:
-        mat=Material('test')
+        mat=Material(name='pbwo4')
+    elif args.material=='test':
+        mat=Material(name='test')
+    else: # ==None
+        X0=float(input('lunghezza di radiazione (cm)\n'))
+        dE=float(input('perdita per ionizzazione (MeV/cm)\n'))
+        Ec=float(input('energia critica (MeV)\n'))
+        mat=Material(X0,dE,Ec)
     
     # switch evoluzione deterministica
     is_det=args.is_deterministic
@@ -350,14 +358,14 @@ def evolve(s,sw,sw_mask,mat,is_det):
     Restituisce:
     n_step : int
         numero totale degli step eseguiti
-    en_ion : list
-        elenco delle energie cedute dalle particelle in ogni step
     n_part : list
         elenco del numero di particelle nello sciame in ogni step
+    en_ion : list
+        elenco delle energie cedute dalle particelle in ogni step
     """
     
-    en_ion=[]
     n_part=[]
+    en_ion=[]
       
     n=1
     while True in sw_mask:
@@ -372,34 +380,40 @@ def evolve(s,sw,sw_mask,mat,is_det):
         
         # INTERAZIONE
         sw=sw.interact(s,is_det)
-        sw.info() # risultato dell'interazione
-        print('n step = '+str(n)+'\n')
+        if __name__=='__main__':
+            sw.info() # risultato dell'interazione
+            print('n step = '+str(n)+'\n')
         
         if len(sw)!=0:
             sw_mask=[True]*len(sw)
             n+=1
         else:
-            print('Non ci sono più particelle che possono interagire.')
-            print()
+            if __name__=='__main__':
+                print('Non ci sono più particelle che possono interagire.')
+                print()
             n_step=n
-    return n_step,en_ion,n_part
+    return n_step,n_part,en_ion
 
 
 if __name__=='__main__':
     ## CONFIGURAZIONE SIMULAZIONE
     args=argp()
+    
     s,Q,E0,mat,is_det=config(args.config_default)
+    mat.info()
+    
     sw=Swarm([Particle(Q,E0)])
     sw_mask=[True]
     sw.info()
     print()
     
     ## SIMULAZIONE EVOLUZIONE SCIAME
-    n_step,en_ion,n_part=evolve(s,sw,sw_mask,mat,is_det)
+    n_step,n_part,en_ion=evolve(s,sw,sw_mask,mat,is_det)
     tot_ion=arrsum(en_ion)
-    print('n_step =',n_step)
-    print('en_ion =',en_ion)
-    print('n_part =',n_part)
-    print('tot_ion =',tot_ion)  
     
-# breakpoint()
+    print('n_step =',n_step)
+    # print('n_part =',n_part)
+    # print('en_ion =',en_ion)
+    print('tot_ion =',tot_ion)
+       
+breakpoint()
