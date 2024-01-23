@@ -50,7 +50,7 @@ class Material():
         Argomenti:
         name : string
             identifica il materiale tra ghiaccio 'h2o' e tungstato di piombo 'pbwo4'
-        """
+        """  
         
         if name=='h2o':
             self.X0=39.31 # cm
@@ -388,7 +388,7 @@ def evolve(s,sw,sw_mask,mat,is_det):
             sw_mask=[True]*len(sw)
             n+=1
         else:
-            if __name__=='__main__':
+            if '__name__'=='__main__':
                 print('Non ci sono più particelle che possono interagire.')
                 print()
             n_step=n
