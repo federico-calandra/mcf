@@ -5,9 +5,9 @@
 (Credits: https://www.mpp.mpg.de/~menke/)
 
 Il programma per la simulazione dello sciame elettromagnetico si trova nella directory [esame](/esame/) ed è composto dagli script `rossi.py` e `main.py`. Il primo è un modulo che contiene la definizione delle classi e della funzione di evoluzione. Il secondo file importa `rossi.py` ed esegue una simulazione montecarlo dell'evoluzione come specificato di seguito:
-fissata l'energia della particella incidente E₀, si costruisce un array di 10 valori equispaziati nell'intervallo (0,E₀]. Per ciascuno di questi valori vengono eseguite 100 simulazioni da cui estrarre valore medio e deviazione standard del numero di iterazioni e dell'energia totale di ionizzazione ceduta al materiale.
+fissata l'energia della particella incidente E₀, si costruisce un array di 10 valori equispaziati nell'intervallo (0,E₀]. Per ciascuno di questi valori vengono eseguite 100 simulazioni da cui estrarre valore medio e deviazione standard della profondità dello sciame e dell'energia totale di ionizzazione ceduta al materiale.
 
-Il programma salva i risultati in un file *.csv* il cui nome è l'istante iniziale della simulazione. Successivamente si esegue il fit ai minimi quadrati per il numero di iterazioni e l'energia totale, mostrando tutti i risultati in forma grafica. Infine il programma stampa a schermo il valore del chi² per i fit.
+Il programma salva i risultati in un file *.csv* il cui nome è l'istante iniziale della simulazione. Successivamente si esegue il fit ai minimi quadrati per la profondità dello sciame e l'energia totale di ionizzazione, mostrando tutti i risultati in forma grafica. Infine il programma stampa a schermo il valore del chi² per i fit.
 
 ## Usage
 In un sistema operativo Linux la sintassi è la seguente:
@@ -18,7 +18,7 @@ Con il flag `[-c]` vengono utilizzati i valori di default per i parametri di sim
 
 Con il flag `[-d]` l'evoluzione non segue le leggi probabilistiche.
 
-Il flag `[-e]` cambia il tipo di simulazione che il programma svolge: con questo flag si eseguono N simulazioni tutte con lo stesso valore E₀ dell'energia incidente (il numero N è inserito dall'utente). Se N=1 il programma mostra i grafici del numero di particelle e dell'energia ceduta in ogni iterazione; se N>1 vengono mostrati i grafici del numero di iterazioni e dell'energia totale ceduta, in funzione dell'indice della simulazione.
+Il flag `[-e]` cambia il tipo di simulazione che il programma svolge: con questo flag si eseguono N simulazioni tutte con lo stesso valore E₀ dell'energia incidente (il numero N è inserito dall'utente). Se N=1 il programma mostra i grafici del numero di particelle e dell'energia ceduta in ogni iterazione; se N>1 vengono mostrati i grafici della profondità dello sciame e dell'energia totale ceduta, in funzione dell'indice della simulazione.
 
 Con l'argomento opzionale `materiale` si sceglie il materiale entro cui lo sciame si progapa. I valori permessi sono `h2o`, `pbwo4` oppure `test`; se non è specificato, il programma chiede all'utente di inserire le grandezze relative.
 
