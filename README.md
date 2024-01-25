@@ -1,6 +1,7 @@
 # Simulazione sciame elettromagnetico
 
 ![sciame](https://www.borborigmi.org/wordpress/wp-content/uploads/2012/02/emshower1.gif)
+(Credits: http://www.borborigmi.org/2012/02/28/rivelatori-di-particelle-a-lhc-quinta-parte-sciami-di-elettroni-e-fotoni/)
 
 Il programma per la simulazione dello sciame elettromagnetico si trova nella directory [esame](/esame/) ed è composto dagli script `rossi.py` e `main.py`. Il primo è un modulo che contiene la definizione delle classi e della funzione di evoluzione. Il secondo file importa `rossi.py` ed esegue una simulazione montecarlo dell'evoluzione come specificato di seguito:
 fissata l'energia della particella incidente E₀, si costruisce un array di 10 valori equispaziati nell'intervallo (0,E₀]. Per ciascuno di questi valori vengono eseguite 100 simulazioni da cui estrarre valore medio e deviazione standard del numero di iterazioni e dell'energia totale di ionizzazione ceduta al materiale.
