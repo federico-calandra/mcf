@@ -6,7 +6,8 @@
 
 Il programma per la simulazione dello sciame elettromagnetico si trova nella directory [esame](/esame/) ed è composto dagli script `rossi.py` e `main.py`. Il primo è un modulo che contiene la definizione delle classi e della funzione di evoluzione. Il secondo file importa `rossi.py` ed esegue una simulazione montecarlo dell'evoluzione come specificato di seguito:
 fissata l'energia della particella incidente E₀, si costruisce un array di 10 valori equispaziati nell'intervallo (0,E₀]. Per ciascuno di questi valori vengono eseguite 100 simulazioni da cui estrarre valore medio e deviazione standard del numero di iterazioni e dell'energia totale di ionizzazione ceduta al materiale.
-Il programma salva i risultati in un file *.csv* il cui nome è l'istante iniziale della simulazione.
+
+Il programma salva i risultati in un file *.csv* il cui nome è l'istante iniziale della simulazione. Successivamente si esegue il fit ai minimi quadrati per il numero di iterazioni e l'energia totale, mostrando tutti i risultati in forma grafica. Infine il programma stampa a schermo il valore del chi² per i fit.
 
 ## Usage
 In un sistema operativo Linux la sintassi è la seguente:

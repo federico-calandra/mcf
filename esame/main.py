@@ -2,26 +2,28 @@
 Questo programma importa il modulo 'rossi.py' ed esegue una simulazione montecarlo della propagazione di uno sciame elettromagnetico in un materiale.
 
 Variabili:
-n_iter : list
-    
-en_ion= : list
-    
-n_part : list
-    
-tot_ion : list
-    
-mean_n_iter : numpy.ndarray
-    valori medi del numero di step
-dev_n_iter : numpy.ndarray
-    deviazioni standard del numeo di step
-mean_tot_ion : numpy.ndarray
-    valori medi dell'energia ceduta al materiale
-dev_tot_ion : numpy.ndarray
-    deviazioni standard dell'energia ceduta al materiale
-E0span : numpy.ndarray
-    array delle energie della particella incidente
 start_time : str
-    istante di inizio della simulazione
+    istante di inizio della simulazione, il formato è 'yyyy_mm_dd--hh_mm_ss'
+df : pandas.core.frame.DataFrame
+    dataframe contenente i risultati delle simulazioni
+p_guess : list
+    valori iniziali dei parametri per il fit
+p_opt : numpy.ndarray
+    valori ottimali dei parametri di fit
+cov :  numpy.ndarray
+    matrice di covarianza dei parametri di fit
+fit_n_iter : pandas.core.series.Series
+    valori del numero di iterazioni secondo il fit ai minimi quadrati
+fit_tot_ion : pandas.core.series.Series
+    valori dell'energia totale di ionizzazione secondo il fit ai minimi quadrati
+stat_n_iter : list
+    media e deviazione standard del numero di iterazioni, nel caso N=1
+stat_tot_ion : list
+    media e deviazione standard dell'energia totale di ionizzazione, nel caso N=1
+chi2_n_iter : float
+    valore del chi² per il fit del numero di iterazioni
+chi2_tot_ion : float
+    valore del chi² per il fit dell'energia totale di ionizzazione
 """
 
 import rossi
@@ -33,21 +35,31 @@ from scipy import optimize
 
 def evolve(s,Q,E0,mat,is_det,N):
     """
-    oneline
+    Wrapper per la funzione rossi.evolve che esegue un numero di simulazioni specificato dall'utente.
 
     Argomenti:
-    s
-    Q
-    E0
-    materiale
-    is_det
-    N
+    s : float
+        passo della simulazione, in frazione di X0
+    Q : int
+        carica della particella
+    E0 : float
+        energia in MeV della particella
+    mat : Material
+        materiale in cui lo sciame si propaga
+    is_det : bool
+        se True la simulazione non segue le leggi probabilistiche
+    N : int
+        numero di simulazioni da eseguire
 
     Restituisce:
     n_iter : list
-        numero di iterazioni di ciascuna simulazione
+        numero di iterazioni per ogni simulazione
+    en_ion= : list
+        energia ceduta in ogni step, per ogni simulazione
+    n_part : list
+        numero di particelle in ogni step, per ogni simulazione
     tot_ion : list
-        energia totale ceduta al materiale
+        energia di ionizzaione totale, per ogni simulazione
     """
     
     n_iter=[]
@@ -56,7 +68,7 @@ def evolve(s,Q,E0,mat,is_det,N):
     tot_ion=[]
 
     for i in range(0,N):
-        sw=rossi.Swarm([rossi.Particle(Q,E0)])
+        sw=rossi.Shower([rossi.Particle(Q,E0)])
         sw_mask=[True]
 
         if i%10==0:
@@ -107,7 +119,7 @@ if args.same_energy!=True: # 50 simulazioni per 10 valori nell'intervallo (0,E0]
     p_guess=[0.1,0]
     p_opt,cov=optimize.curve_fit(fit_func,df['E0'],df['n_iter'],p_guess,sigma=(df['sigma_n_iter'] if is_det!=True else None),absolute_sigma=True)
     fit_n_iter=[fit_func(df['E0'],p_opt[0],p_opt[1]),
-                fit_func(df['E0'],p_opt[0]-np.sqrt(cov[0][0]),p_opt[1]-np.sqrt(cov[1][1])),
+                fit_func(df['E0'],p_opt[0]-np.sqrt(cov[0][0]),p_opt[1]-np.sqrt(cov[1][1])), 
                 fit_func(df['E0'],p_opt[0]+np.sqrt(cov[0][0]),p_opt[1]+np.sqrt(cov[1][1]))]
     
     p_guess=[1,0]
@@ -153,6 +165,7 @@ else: # N simulazioni con la stessa E0
         ax[0].plot(range(1,n_iter[0]+1),n_part[0],color='xkcd:crimson')
         ax_style={'xlabel':'step', 'ylabel':'# di particelle', 'title':'dimensione sciame','xticks':range(1,n_iter[0]+1)}
         ax[0].set(**ax_style)
+
         ax[0].grid(axis='y')
         
         ax[1].plot(range(1,n_iter[0]+1),en_ion[0],color='xkcd:crimson')
@@ -185,4 +198,4 @@ else: # N simulazioni con la stessa E0
         
     plt.show()
 
-# breakpoint()
+breakpoint()

@@ -6,7 +6,7 @@ Material
     rappresenta il materiale in cui lo sciame si propaga
 Particle
     rappresenta una particella dello sciame
-Swarm
+Shower
     rappresenta lo sciame di particelle
     
 Funzioni:
@@ -80,7 +80,7 @@ class Particle():
     
     Attributi:
     q : int
-        carica della particella, può essere 0 (fotone), -1 (elettrone) oppure 1 (positrone)
+        carica della particella
     e : float
         energia in MeV della particella
     x : float
@@ -99,7 +99,7 @@ class Particle():
         
         Argomenti:
         q : int
-            carica della particella, può essere 0 (fotone), -1 (elettrone) oppure 1 (positrone)
+            carica della particella
         e : float
             energia in MeV della particella
         x : float
@@ -195,13 +195,13 @@ class Particle():
         return prod
 
 
-class Swarm(list):
+class Shower(list):
     """
     Rappresenta lo sciame di particelle.
         
     Attributi:
     dim : int
-        nunmero di particelle che compongono lo sciame
+        numero di particelle che compongono lo sciame
 
     Metodi:
     __init__ : costruttore della classe che chiama il costruttore della classe madre
@@ -264,7 +264,7 @@ class Swarm(list):
         for p in self:
             tmpsc.append(p.interact(s,is_det))
         # tmpsc contiene le particelle prodotte dalle interazioni dello sciame
-        tmpsc=Swarm(sum(tmpsc,[])) # equivalente del metodo flatten di numpy
+        tmpsc=Shower(sum(tmpsc,[])) # equivalente del metodo flatten di numpy
         return tmpsc
 
 
@@ -373,7 +373,7 @@ def evolve(s,sw,sw_mask,mat,is_det):
         # sw.info() # risultato della propagazione
         
         # escludere particelle che non hanno abbastanza energia
-        sw=Swarm(compress(sw,sw_mask))
+        sw=Shower(compress(sw,sw_mask))
         # sw.info() # queste particelle sono quelle che interagiscono
         
         # INTERAZIONE
@@ -401,7 +401,7 @@ if __name__=='__main__':
     s,Q,E0,mat,is_det=config(args.config_default)
     mat.info()
     
-    sw=Swarm([Particle(Q,E0)])
+    sw=Shower([Particle(Q,E0)])
     sw_mask=[True]
     sw.info()
     print()
