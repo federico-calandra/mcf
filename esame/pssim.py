@@ -125,29 +125,30 @@ if args.same_energy!=True: # 50 simulazioni per 10 valori nell'intervallo (0,E0]
     p_opt,cov=optimize.curve_fit(fit_func,df['E0'],df['tot_ion'],p_guess,sigma=(df['sigma_tot_ion'] if is_det!=True else None),absolute_sigma=True)
     fit_tot_ion=fit_func(df['E0'],p_opt[0],p_opt[1])
     
+    chi2_depth=np.sum((df['n_iter']-fit_depth[0])**2/df['sigma_depth']**2)
+    chi2_tot_ion=np.sum((df['tot_ion']-fit_tot_ion)**2/df['sigma_tot_ion']**2)
+    print('X² n_iter =',chi2_depth)
+    print('X² tot_ion =',chi2_tot_ion)
+    
     # GRAFICI
     fig,ax=plt.subplots(1,2,figsize=(13,7))
+    fig.suptitle('Q='+str(Q)+', E0='+str(E0)+' MeV, step='+str(s))
     
     ax[0].errorbar(df['E0'], df['depth'], yerr=df['sigma_depth'], fmt='o', color='xkcd:crimson', label='dati')
     ax[0].plot(df['E0'],fit_depth[0],color='xkcd:teal',label='fit')
     ax[0].plot(df['E0'],fit_depth[1],':',color='xkcd:teal',label='incertezza fit')
     ax[0].plot(df['E0'],fit_depth[2],':',color='xkcd:teal')
-    ax_style={'xlabel':'energia particella incidente (MeV)', 'ylabel':'profondità (cm)', 'title':'Profondità dello sciame'}
+    ax_style={'xlabel':'energia particella incidente (MeV)', 'ylabel':'profondità (cm)', 'title':'Profondità dello sciame, chi²='+str(np.round(chi2_depth,2))}
     ax[0].set(**ax_style)
     ax[0].grid(axis='y')
     ax[0].legend()
     
     ax[1].errorbar(df['E0'], df['tot_ion'], yerr=df['sigma_tot_ion'], fmt='o', color='xkcd:crimson', label='dati')
     ax[1].plot(df['E0'],fit_tot_ion,color='xkcd:teal',label='fit')
-    ax_style={'xlabel':'energia particella incidente (MeV)', 'ylabel':'energia (MeV)', 'title':'Energia totale depositata per ionizzazione'}
+    ax_style={'xlabel':'energia particella incidente (MeV)', 'ylabel':'energia (MeV)', 'title':'Energia totale depositata per ionizzazione, chi²='+str(np.round(chi2_tot_ion,2))}
     ax[1].set(**ax_style)
     ax[1].grid(axis='y')
-    ax[1].legend()
-    
-    chi2_depth=np.sum((df['n_iter']-fit_depth[0])**2/df['sigma_depth']**2)
-    chi2_tot_ion=np.sum((df['tot_ion']-fit_tot_ion)**2/df['sigma_tot_ion']**2)
-    print('X² n_iter =',chi2_depth)
-    print('X² tot_ion =',chi2_tot_ion)
+    ax[1].legend()    
     
     plt.show()
     
@@ -160,6 +161,7 @@ else: # N simulazioni con la stessa E0
         n_iter,n_part,en_ion,tot_ion=evolve(s,Q,E0,mat,is_det,N)
         
         fig,ax=plt.subplots(1,2,figsize=(13,7))
+        fig.suptitle('Particella Q='+str(Q)+', E0='+str(E0)+' MeV')
         
         ax[0].plot(range(1,n_iter[0]+1),n_part,color='xkcd:crimson')
         ax_style={'xlabel':'step', 'ylabel':'# di particelle', 'title':'dimensione sciame','xticks':range(1,n_iter[0]+1)}
@@ -184,6 +186,7 @@ else: # N simulazioni con la stessa E0
         print('tot_ion = {} ± {} MeV'.format(stat_tot_ion[0],stat_tot_ion[1]))
         
         fig,ax=plt.subplots(1,2,figsize=(13,7))
+        fig.suptitle('Particella Q='+str(Q)+', E0='+str(E0)+' MeV')
         
         ax[0].plot(range(1,N+1),mat.X0*s*n_iter,'.',color='xkcd:crimson',label='dati')
         ax[0].hlines(stat_depth[0],0,N+1,color='xkcd:teal',label='valore medio')
@@ -199,4 +202,4 @@ else: # N simulazioni con la stessa E0
         
     plt.show()
 
-# breakpoint()
+breakpoint()

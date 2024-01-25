@@ -220,11 +220,11 @@ class Shower(list):
 def argp():
     """ Inizializza il parser degli argomenti. """
         
-    parser=argparse.ArgumentParser()
-    parser.add_argument('-c','--config-default',action='store_true')
-    parser.add_argument('-d','--is-deterministic',action='store_true')
-    parser.add_argument('-e','--same-energy',action='store_true')
-    parser.add_argument('material',nargs='?',default=None)
+    parser=argparse.ArgumentParser(prog='pssim', description='A little program to simulate the propagation of a particle shower through a material. Coded by Federico Calandra with love.', epilog='Check README for more information')
+    parser.add_argument('-c','--config-default',action='store_true',help='use default values for parameters')
+    parser.add_argument('-d','--is-deterministic',action='store_true',help='disable probabilistic behavior')
+    parser.add_argument('-e','--same-energy',action='store_true',help='do simulations with the same starting energy')
+    parser.add_argument('material',nargs='?',default=None,help='optional choise in {h2o,pbwo4,test}')
     return  parser.parse_args()
 
 
