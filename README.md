@@ -21,7 +21,7 @@ Il flag `[-e]` cambia il tipo di simulazione che il programma svolge: con questo
 
 Con l'argomento opzionale `materiale` si sceglie il materiale entro cui lo sciame si progapa. I valori permessi sono `h2o`, `pbwo4` oppure `test`; se non è specificato, il programma chiede all'utente di inserire le grandezze relative.
 
-Con la stessa sintassi (ad esclusione del flag `-e`) è possibile eseguire `rossi.py`. In questo caso viene svolta 1 simulazione ed è possibile leggere a schermo è dettagli sulle particelle dello sciame ad ogni iterazione.
+Con la stessa sintassi (ad esclusione del flag `-e`) è possibile eseguire `rossi.py`. In questo caso viene svolta una sola simulazione ed è possibile leggere a schermo è dettagli sulle particelle dello sciame ad ogni iterazione.
 
 ### Examples
 * ```python main.py``` : inserire tutti i parametri di simulazione
