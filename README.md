@@ -20,7 +20,7 @@ Con il flag `[-d]` l'evoluzione non segue le leggi probabilistiche.
 
 Il flag `[-e]` cambia il tipo di simulazione che il programma svolge: con questo flag si eseguono N simulazioni tutte con lo stesso valore E₀ dell'energia incidente (il numero N è inserito dall'utente). Se N=1 il programma mostra i grafici del numero di particelle e dell'energia ceduta in ogni iterazione; se N>1 vengono mostrati i grafici della profondità dello sciame e dell'energia totale ceduta, in funzione dell'indice della simulazione.
 
-Con l'argomento opzionale `materiale` si sceglie il materiale entro cui lo sciame si progapa. I valori permessi sono `h2o`, `pbwo4` oppure `test`; se non è specificato, il programma chiede all'utente di inserire le grandezze relative.
+Con l'argomento opzionale `materiale` si sceglie il materiale entro cui lo sciame si progapa. I valori permessi sono `h2o`, `pbwo4` oppure `test`; se non è specificato, il programma chiede all'utente di inserire le grandezze relative. Le proprietà dei materiali sono state prese dai dati disponibili a [questo](https://pdg.lbl.gov/2017/AtomicNuclearProperties/) indirizzo. 
 
 Con la stessa sintassi (ad esclusione del flag `-e`) è possibile eseguire `rossi.py`. In questo caso viene svolta una sola simulazione ed è possibile leggere a schermo è dettagli sulle particelle dello sciame ad ogni iterazione.
 
