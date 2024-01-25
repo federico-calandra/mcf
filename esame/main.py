@@ -27,7 +27,7 @@ start_time : str
 import rossi
 import matplotlib.pyplot as plt
 import numpy as np
-from time import ctime
+from time import strftime
 from pandas import DataFrame
 from scipy import optimize
 
@@ -85,7 +85,7 @@ if args.same_energy!=True: # 50 simulazioni per 10 valori nell'intervallo (0,E0]
     df=DataFrame(columns=['E0','n_iter','sigma_n_iter','tot_ion','sigma_tot_ion'])
     df['E0']=np.linspace(0,E0,num=11)[1:]
     
-    start_time=ctime()
+    start_time=strftime("%Y_%m_%d--%H_%M_%S")
     for e0,i in zip(df['E0'],df['E0'].index):
         print('E0 =',e0,"MeV")
         n_iter,tot_ion=evolve(s,Q,e0,mat,is_det,100)
@@ -105,13 +105,13 @@ if args.same_energy!=True: # 50 simulazioni per 10 valori nell'intervallo (0,E0]
         return a*x+b
     
     p_guess=[0.1,0]
-    p_opt,cov=optimize.curve_fit(fit_func,df['E0'],df['n_iter'],p_guess,sigma=df['sigma_n_iter'],absolute_sigma=True)
+    p_opt,cov=optimize.curve_fit(fit_func,df['E0'],df['n_iter'],p_guess,sigma=(df['sigma_n_iter'] if is_det!=True else None),absolute_sigma=True)
     fit_n_iter=[fit_func(df['E0'],p_opt[0],p_opt[1]),
                 fit_func(df['E0'],p_opt[0]-np.sqrt(cov[0][0]),p_opt[1]-np.sqrt(cov[1][1])),
                 fit_func(df['E0'],p_opt[0]+np.sqrt(cov[0][0]),p_opt[1]+np.sqrt(cov[1][1]))]
     
     p_guess=[1,0]
-    p_opt,cov=optimize.curve_fit(fit_func,df['E0'],df['tot_ion'],p_guess,sigma=df['sigma_tot_ion'],absolute_sigma=True)
+    p_opt,cov=optimize.curve_fit(fit_func,df['E0'],df['tot_ion'],p_guess,sigma=(df['sigma_tot_ion'] if is_det!=True else None),absolute_sigma=True)
     fit_tot_ion=fit_func(df['E0'],p_opt[0],p_opt[1])
     
     # GRAFICI
@@ -185,4 +185,4 @@ else: # N simulazioni con la stessa E0
         
     plt.show()
 
-breakpoint()
+# breakpoint()

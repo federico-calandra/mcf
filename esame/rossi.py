@@ -275,7 +275,7 @@ def argp():
     parser.add_argument('-c','--config-default',action='store_true')
     parser.add_argument('-d','--is-deterministic',action='store_true')
     parser.add_argument('-e','--same-energy',action='store_true')
-    parser.add_argument('-m','--material',action='store')
+    parser.add_argument('material',nargs='?',default=None)
     return  parser.parse_args()
 
 
@@ -300,24 +300,6 @@ def config(config_default):
         se True la simulazione non segue le leggi probabilistiche
     """
     
-    # step e carica
-    if config_default==True:
-        s=1
-        Q=-1
-        E0=1e3
-    else:
-        # step della simulazione
-        s=0
-        while (s<=0) or (s>1):
-            s=float(input('passo della simulazione (default 1.0)\n') or 1.0)
-        # carica ed energia particella
-        Q=None
-        while Q not in [-1,0,1]:
-            Q=int(input('carica della particella (default -1)\n') or -1)
-        E0=0
-        while E0<=0:
-            E0=float(input('energia in MeV della particella (default 1000.0)\n') or 1e3)
-            
     args=argp()  
  
     # materiale
@@ -328,11 +310,27 @@ def config(config_default):
     elif args.material=='test':
         mat=Material(name='test')
     else: # ==None
-        X0=float(input('lunghezza di radiazione (cm)\n'))
-        dE=float(input('perdita per ionizzazione (MeV/cm)\n'))
-        Ec=float(input('energia critica (MeV)\n'))
+        X0=float(input('lunghezza di radiazione [cm] (default 0.89)\n') or 0.89)
+        dE=float(input('perdita per ionizzazione [MeV/cm] (default 10.20)\n') or 10.20)
+        Ec=float(input('energia critica [MeV] (default 9.31)\n') or 9.31)
         mat=Material(X0,dE,Ec)
     
+    # step e carica
+    if config_default==True:
+        s=1
+        Q=-1
+        E0=1e3
+    else:
+        s=0
+        Q=None
+        E0=0
+        while (s<=0) or (s>1):
+            s=float(input('passo della simulazione (default 1.0)\n') or 1.0)
+        while Q not in [-1,0,1]:
+            Q=int(input('carica della particella (default -1)\n') or -1)
+        while E0<=0:
+            E0=float(input('energia della particella [MeV] (default 1000.0)\n') or 1e3)
+
     # switch evoluzione deterministica
     is_det=args.is_deterministic
     
@@ -397,8 +395,9 @@ def evolve(s,sw,sw_mask,mat,is_det):
 
 if __name__=='__main__':
     ## CONFIGURAZIONE SIMULAZIONE
+    # breakpoint()
     args=argp()
-    
+
     s,Q,E0,mat,is_det=config(args.config_default)
     mat.info()
     
