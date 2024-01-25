@@ -1,21 +1,5 @@
 """
 Questo programma definisce la classe degli oggetti Particella, Sciame e Materiale e definisce la funzione che simula la propagazione di uno sciame elettromagnetico secondo un modello derivato da quello di Rossi.
-
-Classi:
-Material
-    rappresenta il materiale in cui lo sciame si propaga
-Particle
-    rappresenta una particella dello sciame
-Shower
-    rappresenta lo sciame di particelle
-    
-Funzioni:
-argp
-    inizializza il parser degli argomenti
-config
-    configura i parametri necessari per la simulazione
-evolve
-    calcola la propagazione e l'interazione di tutte le particelle dello sciame
 """
 
 import argparse
@@ -26,22 +10,7 @@ from numpy import sum as arrsum
 from scipy.constants import m_e,c
 
 class Material():
-    """
-    Rappresenta il materiale in cui lo sciame si propaga.
-    
-    Attributi:
-    X0 : float
-        lunghezza di radiazione in cm
-    dE : float
-        perdita di energia per ionizzazione, per unità di lunghezza (MeV/cm)
-    Ec : float
-        energia critica
-    en_ion : list
-        energia depositata dalle particelle durante lo step
-
-    Metodi:
-    __init__ : costruttore della classe
-    """
+    """ Rappresenta il materiale in cui lo sciame si propaga. """
     
     def __init__(self,X0=None,dE=None,Ec=None,name=None):
         """ 
@@ -50,6 +19,12 @@ class Material():
         Argomenti:
         name : string
             identifica il materiale tra ghiaccio 'h2o' e tungstato di piombo 'pbwo4'
+        X0 : float
+            lunghezza di radiazione (cm)
+        dE : float
+            perdita di energia per ionizzazione, per unità di lunghezza (MeV/cm)
+        Ec : float
+            energia critica (MeV)
         """  
         
         if name=='h2o':
@@ -70,28 +45,13 @@ class Material():
             self.Ec=Ec
             
     def info(self):
+        """ Stampa gli attributi del materiale. """
         print('*** Materiale ***')
         print('X0 = {} cm, dE = {} MeV/cm, Ec = {} MeV'.format(self.X0,self.dE,self.Ec))
             
 
 class Particle():
-    """
-    Rappresenta una particella dello sciame.
-    
-    Attributi:
-    q : int
-        carica della particella
-    e : float
-        energia in MeV della particella
-    x : float
-        posizione in cm della particella rispetto al punto di ingreso nel materiale
-
-    Metodi:
-    __init__ : costruttore della classe
-    info : stampa gli attributi della particella
-    propagate : calcola la propagazione della particella e la perdita di energia per ionizzazione
-    interact : calcola i prodotti dell'interazione della particella con il materiale
-    """
+    """ Rappresenta una particella dello sciame. """
     
     def __init__(self, q, e, x=0):
         """
@@ -196,21 +156,10 @@ class Particle():
 
 
 class Shower(list):
-    """
-    Rappresenta lo sciame di particelle.
-        
-    Attributi:
-    dim : int
-        numero di particelle che compongono lo sciame
-
-    Metodi:
-    __init__ : costruttore della classe che chiama il costruttore della classe madre
-    info : stampa la dimensione e gli attributi delle particelle dello sciame
-    propagate : calcola la propagazione della particella e la perdita di energia per ionizzazione
-    interact : calcola i prodotti dell'interazione della particella con il materiale
-    """
+    """ Rappresenta lo sciame di particelle. """
     
     def __init__(self,*args): # con *args si può creare uno sciame a partire da una particella esistente
+        ''' Crea uno sciame '''
         super().__init__(*args)
         self.dim=len(self)
     
@@ -281,7 +230,7 @@ def argp():
 
 def config(config_default):
     """
-    La funzione chiede all'utente di inserire i parametri necessari per la simulazione.
+    Chiede all'utente di inserire i parametri necessari per la simulazione.
     
     Argomenti;
     config_default : bool
@@ -395,7 +344,6 @@ def evolve(s,sw,sw_mask,mat,is_det):
 
 if __name__=='__main__':
     ## CONFIGURAZIONE SIMULAZIONE
-    # breakpoint()
     args=argp()
 
     s,Q,E0,mat,is_det=config(args.config_default)

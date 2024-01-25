@@ -6,22 +6,18 @@ start_time : str
     istante di inizio della simulazione, il formato è 'yyyy_mm_dd--hh_mm_ss'
 df : pandas.core.frame.DataFrame
     dataframe contenente i risultati delle simulazioni
-p_guess : list
-    valori iniziali dei parametri per il fit
-p_opt : numpy.ndarray
-    valori ottimali dei parametri di fit
-cov :  numpy.ndarray
-    matrice di covarianza dei parametri di fit
 fit_n_iter : pandas.core.series.Series
     valori del numero di iterazioni secondo il fit ai minimi quadrati
 fit_tot_ion : pandas.core.series.Series
     valori dell'energia totale di ionizzazione secondo il fit ai minimi quadrati
 stat_n_iter : list
     media e deviazione standard del numero di iterazioni, nel caso N=1
+stat_depth : list
+    media e deviazione standard della profondità dello sciame, nel caso N=1
 stat_tot_ion : list
     media e deviazione standard dell'energia totale di ionizzazione, nel caso N=1
-chi2_n_iter : float
-    valore del chi² per il fit del numero di iterazioni
+chi2_depth : float
+    valore del chi² per il fit della profondità dello sciame
 chi2_tot_ion : float
     valore del chi² per il fit dell'energia totale di ionizzazione
 """
@@ -52,20 +48,20 @@ def evolve(s,Q,E0,mat,is_det,N):
         numero di simulazioni da eseguire
 
     Restituisce:
-    n_iter : list
+    n_iter : numpy.ndarray
         numero di iterazioni per ogni simulazione
-    en_ion= : list
+    en_ion= : numpy.ndarray
         energia ceduta in ogni step, per ogni simulazione
-    n_part : list
+    n_part : numpy.ndarray
         numero di particelle in ogni step, per ogni simulazione
-    tot_ion : list
+    tot_ion : numpy.ndarray
         energia di ionizzaione totale, per ogni simulazione
     """
     
-    n_iter=[]
-    en_ion=[]
-    n_part=[]
-    tot_ion=[]
+    n_iter=np.array([],dtype=int)
+    en_ion=np.array([])
+    n_part=np.array([])
+    tot_ion=np.array([]) 
 
     for i in range(0,N):
         sw=rossi.Shower([rossi.Particle(Q,E0)])
@@ -75,10 +71,10 @@ def evolve(s,Q,E0,mat,is_det,N):
             print('N = ',i+1)
         sim=rossi.evolve(s,sw,sw_mask,mat,is_det)
         
-        n_iter.append(sim[0])
-        n_part.append(sim[1])
-        en_ion.append(sim[2])
-        tot_ion.append(np.sum(sim[2]))
+        n_iter=np.append(n_iter,sim[0])
+        n_part=np.append(n_part,sim[1])
+        en_ion=np.append(en_ion,sim[2])
+        tot_ion=np.append(tot_ion,np.sum(sim[2]))
         
     if N==1:
         return n_iter,n_part,en_ion,tot_ion
@@ -94,7 +90,7 @@ mat.info()
 print()
 
 if args.same_energy!=True: # 50 simulazioni per 10 valori nell'intervallo (0,E0]
-    df=DataFrame(columns=['E0','n_iter','sigma_n_iter','tot_ion','sigma_tot_ion'])
+    df=DataFrame(columns=['E0','n_iter','sigma_n_iter','depth','sigma_depth','tot_ion','sigma_tot_ion'])
     df['E0']=np.linspace(0,E0,num=11)[1:]
     
     start_time=strftime("%Y_%m_%d--%H_%M_%S")
@@ -104,6 +100,8 @@ if args.same_energy!=True: # 50 simulazioni per 10 valori nell'intervallo (0,E0]
         
         df.at[i,'n_iter']=np.mean(n_iter)
         df.at[i,'sigma_n_iter']=np.std(n_iter)
+        df.at[i,'depth']=mat.X0*s*np.mean(n_iter)
+        df.at[i,'sigma_depth']=mat.X0*s*np.std(n_iter)
         df.at[i,'tot_ion']=np.mean(tot_ion)
         df.at[i,'sigma_tot_ion']=np.std(tot_ion)
     
@@ -114,11 +112,12 @@ if args.same_energy!=True: # 50 simulazioni per 10 valori nell'intervallo (0,E0]
 
     # FIT LINEARE
     def fit_func(x,a,b):
+        ''' Funzione per il fit ai minimi quadrati. '''
         return a*x+b
     
     p_guess=[0.1,0]
-    p_opt,cov=optimize.curve_fit(fit_func,df['E0'],df['n_iter'],p_guess,sigma=(df['sigma_n_iter'] if is_det!=True else None),absolute_sigma=True)
-    fit_n_iter=[fit_func(df['E0'],p_opt[0],p_opt[1]),
+    p_opt,cov=optimize.curve_fit(fit_func,df['E0'],df['depth'],p_guess,sigma=(df['sigma_depth'] if is_det!=True else None),absolute_sigma=True)
+    fit_depth=[fit_func(df['E0'],p_opt[0],p_opt[1]),
                 fit_func(df['E0'],p_opt[0]-np.sqrt(cov[0][0]),p_opt[1]-np.sqrt(cov[1][1])), 
                 fit_func(df['E0'],p_opt[0]+np.sqrt(cov[0][0]),p_opt[1]+np.sqrt(cov[1][1]))]
     
@@ -129,25 +128,25 @@ if args.same_energy!=True: # 50 simulazioni per 10 valori nell'intervallo (0,E0]
     # GRAFICI
     fig,ax=plt.subplots(1,2,figsize=(13,7))
     
-    ax[0].errorbar(df['E0'], df['n_iter'], yerr=df['sigma_n_iter'], fmt='o', color='xkcd:crimson', label='dati')
-    ax[0].plot(df['E0'],fit_n_iter[0],color='xkcd:teal',label='fit')
-    ax[0].plot(df['E0'],fit_n_iter[1],':',color='xkcd:teal',label='incertezza fit')
-    ax[0].plot(df['E0'],fit_n_iter[2],':',color='xkcd:teal')
-    ax_style={'xlabel':'energia particella incidente (MeV)', 'ylabel':'distanza (cm)', 'title':'lunghezza di penetrazione nel materiale'}
+    ax[0].errorbar(df['E0'], df['depth'], yerr=df['sigma_depth'], fmt='o', color='xkcd:crimson', label='dati')
+    ax[0].plot(df['E0'],fit_depth[0],color='xkcd:teal',label='fit')
+    ax[0].plot(df['E0'],fit_depth[1],':',color='xkcd:teal',label='incertezza fit')
+    ax[0].plot(df['E0'],fit_depth[2],':',color='xkcd:teal')
+    ax_style={'xlabel':'energia particella incidente (MeV)', 'ylabel':'profondità (cm)', 'title':'Profondità dello sciame'}
     ax[0].set(**ax_style)
     ax[0].grid(axis='y')
     ax[0].legend()
     
     ax[1].errorbar(df['E0'], df['tot_ion'], yerr=df['sigma_tot_ion'], fmt='o', color='xkcd:crimson', label='dati')
     ax[1].plot(df['E0'],fit_tot_ion,color='xkcd:teal',label='fit')
-    ax_style={'xlabel':'energia particella incidente (MeV)', 'ylabel':'energia (MeV)', 'title':'energia totale depositata per ionizzazione'}
+    ax_style={'xlabel':'energia particella incidente (MeV)', 'ylabel':'energia (MeV)', 'title':'Energia totale depositata per ionizzazione'}
     ax[1].set(**ax_style)
     ax[1].grid(axis='y')
     ax[1].legend()
     
-    chi2_n_iter=np.sum((df['n_iter']-fit_n_iter[0])**2/df['sigma_n_iter']**2)
+    chi2_depth=np.sum((df['n_iter']-fit_depth[0])**2/df['sigma_depth']**2)
     chi2_tot_ion=np.sum((df['tot_ion']-fit_tot_ion)**2/df['sigma_tot_ion']**2)
-    print('X² n_iter =',chi2_n_iter)
+    print('X² n_iter =',chi2_depth)
     print('X² tot_ion =',chi2_tot_ion)
     
     plt.show()
@@ -162,13 +161,13 @@ else: # N simulazioni con la stessa E0
         
         fig,ax=plt.subplots(1,2,figsize=(13,7))
         
-        ax[0].plot(range(1,n_iter[0]+1),n_part[0],color='xkcd:crimson')
+        ax[0].plot(range(1,n_iter[0]+1),n_part,color='xkcd:crimson')
         ax_style={'xlabel':'step', 'ylabel':'# di particelle', 'title':'dimensione sciame','xticks':range(1,n_iter[0]+1)}
         ax[0].set(**ax_style)
 
         ax[0].grid(axis='y')
         
-        ax[1].plot(range(1,n_iter[0]+1),en_ion[0],color='xkcd:crimson')
+        ax[1].plot(range(1,n_iter[0]+1),en_ion,color='xkcd:crimson')
         ax_style={'xlabel':'step', 'ylabel':'energia (MeV)', 'title':'energia ceduta nello step','xticks':range(1,n_iter[0]+1)}
         ax[1].set(**ax_style)
         ax[1].grid(axis='y')
@@ -178,15 +177,17 @@ else: # N simulazioni con la stessa E0
         print()
     
         stat_n_iter=[np.round(np.mean(n_iter),0),np.round(np.std(n_iter),0)]
+        stat_depth=[mat.X0*s*np.round(np.mean(n_iter),0),mat.X0*s*np.round(np.std(n_iter),0)]
         stat_tot_ion=[np.mean(tot_ion),np.std(tot_ion)]
         print('n_iter = {} ± {}'.format(stat_n_iter[0],stat_n_iter[1]))
+        print('depth = {} ± {} cm'.format(stat_depth[0],stat_depth[1]))
         print('tot_ion = {} ± {} MeV'.format(stat_tot_ion[0],stat_tot_ion[1]))
         
         fig,ax=plt.subplots(1,2,figsize=(13,7))
         
-        ax[0].plot(range(1,N+1),n_iter,'.',color='xkcd:crimson',label='dati')
-        ax[0].hlines(stat_n_iter[0],0,N+1,color='xkcd:teal',label='valore medio')
-        ax_style={'xlabel':'N simulazione', 'ylabel':'Iterazioni', 'title':'Numero di iterazioni','ylim':(0,None)}
+        ax[0].plot(range(1,N+1),mat.X0*s*n_iter,'.',color='xkcd:crimson',label='dati')
+        ax[0].hlines(stat_depth[0],0,N+1,color='xkcd:teal',label='valore medio')
+        ax_style={'xlabel':'N simulazione', 'ylabel':'Profondià (cm)', 'title':'Profondità dello sciame','ylim':(0,None)}
         ax[0].set(**ax_style)
         ax[0].legend(loc='lower left')
         
@@ -198,4 +199,4 @@ else: # N simulazioni con la stessa E0
         
     plt.show()
 
-breakpoint()
+# breakpoint()
