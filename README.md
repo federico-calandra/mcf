@@ -1,6 +1,6 @@
 # Simulazione sciame elettromagnetico
 
-![sciame](https://www.borborigmi.org/wordpress/wp-content/uploads/2012/02/emshower1.gif)
+![sciame](https://www.mpp.mpg.de/~menke/elss/pic2.shtml?unwrap)
 
 (Credits: http://www.borborigmi.org/2012/02/28/rivelatori-di-particelle-a-lhc-quinta-parte-sciami-di-elettroni-e-fotoni/)
 
