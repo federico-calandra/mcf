@@ -33,7 +33,7 @@ Con la stessa sintassi (ad esclusione del flag `-e`) è possibile eseguire `ross
 
 * ```python pssim.py pbwo4 -e``` : simulazione alternativa
 
-* ```python rossi.py test -cde```  : simulazione per scopi di test
+* ```python rossi.py test -cd```  : simulazione per scopi di test
 
 ## System requirements
 Il codice è progettato per essere eseguito con Python 3 e sono necessarie le librerie `numpy`, `scipy` e `pandas`. Può essere eseguito su sistemi operativi Windows, Linux e macOS.
