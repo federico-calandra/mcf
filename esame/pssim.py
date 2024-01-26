@@ -117,6 +117,7 @@ if args.same_energy!=True: # 50 simulazioni per 10 valori nell'intervallo (0,E0]
     
     p_guess=[0.1,0]
     p_opt,cov=optimize.curve_fit(fit_func,df['E0'],df['depth'],p_guess,sigma=(df['sigma_depth'] if is_det!=True else None),absolute_sigma=True)
+    print('dL/dE₀ = {} ± {} cm/MeV'.format(np.round(p_opt[0],4),np.round(np.sqrt(cov[0][0])),4))
     fit_depth=[fit_func(df['E0'],p_opt[0],p_opt[1]),
                 fit_func(df['E0'],p_opt[0]-np.sqrt(cov[0][0]),p_opt[1]-np.sqrt(cov[1][1])), 
                 fit_func(df['E0'],p_opt[0]+np.sqrt(cov[0][0]),p_opt[1]+np.sqrt(cov[1][1]))]
@@ -127,8 +128,8 @@ if args.same_energy!=True: # 50 simulazioni per 10 valori nell'intervallo (0,E0]
     
     chi2_depth=np.sum((df['n_iter']-fit_depth[0])**2/df['sigma_depth']**2)
     chi2_tot_ion=np.sum((df['tot_ion']-fit_tot_ion)**2/df['sigma_tot_ion']**2)
-    print('X² n_iter =',chi2_depth)
-    print('X² tot_ion =',chi2_tot_ion)
+    print('X² n_iter =',np.round(chi2_depth,2))
+    print('X² tot_ion =',np.round(chi2_tot_ion,2))
     
     # GRAFICI
     fig,ax=plt.subplots(1,2,figsize=(13,7))
