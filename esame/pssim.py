@@ -155,7 +155,7 @@ if args.same_energy!=True: # 50 simulazioni per 10 valori nell'intervallo (0,E0]
 else: # N simulazioni con la stessa E0
     N=0
     while N<=0:
-        N=int(input('numero di simulazioni da eseguire (default 1): \n') or 1)
+        N=int(input('Numero di simulazioni da eseguire (default 1): \n') or 1)
 
     if N==1:
         n_iter,n_part,en_ion,tot_ion=evolve(s,Q,E0,mat,is_det,N)
