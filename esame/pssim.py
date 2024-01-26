@@ -161,7 +161,7 @@ else: # N simulazioni con la stessa E0
         n_iter,n_part,en_ion,tot_ion=evolve(s,Q,E0,mat,is_det,N)
         
         fig,ax=plt.subplots(1,2,figsize=(13,7))
-        fig.suptitle('Particella Q='+str(Q)+', E0='+str(E0)+' MeV')
+        fig.suptitle('Particella Q='+str(Q)+', E0='+str(E0)+' MeV, step='+str(s))
         
         ax[0].plot(range(1,n_iter[0]+1),n_part,color='xkcd:crimson')
         ax_style={'xlabel':'step', 'ylabel':'# di particelle', 'title':'Dimensione sciame','xticks':range(1,n_iter[0]+1)}
@@ -186,7 +186,7 @@ else: # N simulazioni con la stessa E0
         print('tot_ion = {} ± {} MeV'.format(stat_tot_ion[0],stat_tot_ion[1]))
         
         fig,ax=plt.subplots(1,2,figsize=(13,7))
-        fig.suptitle('Particella Q='+str(Q)+', E0='+str(E0)+' MeV')
+        fig.suptitle('Particella Q='+str(Q)+', E0='+str(E0)+' MeV, step='+str(s))
         
         ax[0].plot(range(1,N+1),mat.X0*s*n_iter,'.',color='xkcd:crimson',label='dati')
         ax[0].hlines(stat_depth[0],0,N+1,color='xkcd:teal',label='valore medio')
@@ -202,4 +202,4 @@ else: # N simulazioni con la stessa E0
         
     plt.show()
 
-breakpoint()
+# breakpoint()
