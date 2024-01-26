@@ -53,7 +53,7 @@ class Material():
 class Particle():
     """ Rappresenta una particella dello sciame. """
     
-    def __init__(self, q, e, x=0):
+    def __init__(self,q,e,x=0):
         """
         Crea una particella.
         
@@ -220,7 +220,7 @@ class Shower(list):
 def argp():
     """ Inizializza il parser degli argomenti. """
         
-    parser=argparse.ArgumentParser(prog='pssim', description='A little program to simulate the propagation of a particle shower through a material. Coded by Federico Calandra with love.', epilog='Check README for more information')
+    parser=argparse.ArgumentParser(prog='pssim', description='A little program to simulate the propagation of a particle shower through a material. Coded by Federico Calandra with love.', epilog='Check README for more information.')
     parser.add_argument('-c','--config-default',action='store_true',help='use default values for parameters')
     parser.add_argument('-d','--is-deterministic',action='store_true',help='disable probabilistic behavior')
     parser.add_argument('-e','--same-energy',action='store_true',help='do simulations with the same starting energy')
@@ -259,9 +259,9 @@ def config(config_default):
     elif args.material=='test':
         mat=Material(name='test')
     else: # ==None
-        X0=float(input('lunghezza di radiazione [cm] (default 0.89)\n') or 0.89)
-        dE=float(input('perdita per ionizzazione [MeV/cm] (default 10.20)\n') or 10.20)
-        Ec=float(input('energia critica [MeV] (default 9.31)\n') or 9.31)
+        X0=float(input('Lunghezza di radiazione [cm] (default 0.89)\n') or 0.89)
+        dE=float(input('Perdita per ionizzazione [MeV/cm] (default 10.20)\n') or 10.20)
+        Ec=float(input('Energia critica [MeV] (default 9.31)\n') or 9.31)
         mat=Material(X0,dE,Ec)
     
     # step e carica
@@ -274,11 +274,11 @@ def config(config_default):
         Q=None
         E0=0
         while (s<=0) or (s>1):
-            s=float(input('passo della simulazione (default 1.0)\n') or 1.0)
+            s=float(input('Passo della simulazione (default 1.0)\n') or 1.0)
         while Q not in [-1,0,1]:
-            Q=int(input('carica della particella (default -1)\n') or -1)
+            Q=int(input('Carica della particella (default -1)\n') or -1)
         while E0<=0:
-            E0=float(input('energia della particella [MeV] (default 1000.0)\n') or 1e3)
+            E0=float(input('Energia della particella [MeV] (default 1000.0)\n') or 1e3)
 
     # switch evoluzione deterministica
     is_det=args.is_deterministic
