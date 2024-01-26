@@ -164,13 +164,13 @@ else: # N simulazioni con la stessa E0
         fig.suptitle('Particella Q='+str(Q)+', E0='+str(E0)+' MeV')
         
         ax[0].plot(range(1,n_iter[0]+1),n_part,color='xkcd:crimson')
-        ax_style={'xlabel':'step', 'ylabel':'# di particelle', 'title':'dimensione sciame','xticks':range(1,n_iter[0]+1)}
+        ax_style={'xlabel':'step', 'ylabel':'# di particelle', 'title':'Dimensione sciame','xticks':range(1,n_iter[0]+1)}
         ax[0].set(**ax_style)
 
         ax[0].grid(axis='y')
         
         ax[1].plot(range(1,n_iter[0]+1),en_ion,color='xkcd:crimson')
-        ax_style={'xlabel':'step', 'ylabel':'energia (MeV)', 'title':'energia ceduta nello step','xticks':range(1,n_iter[0]+1)}
+        ax_style={'xlabel':'step', 'ylabel':'energia (MeV)', 'title':'Energia ceduta nello step','xticks':range(1,n_iter[0]+1)}
         ax[1].set(**ax_style)
         ax[1].grid(axis='y')
         
